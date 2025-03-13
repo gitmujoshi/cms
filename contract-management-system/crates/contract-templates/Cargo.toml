@@ -1,0 +1,39 @@
+[package]
+name = "contract-templates"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Organization <contact@your-org.com>"]
+description = "Contract template management for AI model training agreements"
+
+[dependencies]
+# Template Engine
+handlebars = "5.1"
+tera = "1.19"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Validation
+jsonschema = "0.17"
+regex = "1.10"
+
+# Storage
+aws-sdk-s3 = "1.11"
+aws-config = "1.1"
+
+# Error Handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.7", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tokio = { version = "1.36", features = ["full", "test-util"] }
+rstest = "0.18"
+test-case = "3.3"
+mockall = "0.12"
+
+[features]
+default = []
+test-utils = [] 

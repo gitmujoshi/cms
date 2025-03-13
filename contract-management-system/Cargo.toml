@@ -1,0 +1,104 @@
+[package]
+name = "contract-management-system"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Organization <contact@your-org.com>"]
+description = "Digital Contract Management System for AI Model Training"
+license = "MIT"
+
+[lib]
+name = "contract_management_system"
+path = "src/lib.rs"
+
+[[bin]]
+name = "contract-management-system"
+path = "src/main.rs"
+
+[dependencies]
+# Web Framework
+actix-web = "4.4"
+actix-rt = "2.9"
+actix-cors = "0.6"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "chrono", "uuid"] }
+tokio-postgres = "0.7"
+
+# Async Runtime
+tokio = { version = "1.36", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Authentication & Authorization
+jsonwebtoken = "9.2"
+bcrypt = "0.15"
+
+# AWS Integration
+aws-config = "1.1"
+aws-sdk-kms = "1.11"
+aws-sdk-s3 = "1.11"
+aws-nitro-enclaves-sdk = "0.4"
+
+# Cryptography
+ring = "0.17"
+sodiumoxide = "0.2"
+x509-parser = "0.15"
+
+# Logging & Monitoring
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+prometheus = "0.13"
+
+# Error Handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.7", features = ["v4", "serde"] }
+url = "2.5"
+regex = "1.10"
+
+# Zero-Knowledge Proofs
+bulletproofs = "4.0"
+curve25519-dalek = "4.1"
+
+# Model Training
+tch = "0.14"  # PyTorch bindings for Rust
+ndarray = "0.15"
+
+# Template Engine
+handlebars = "5.1"
+tera = "1.19"
+
+[dev-dependencies]
+mockall = "0.12"
+rstest = "0.18"
+test-case = "3.3"
+wiremock = "0.5"
+fake = { version = "2.9", features = ['derive'] }
+
+[features]
+default = ["postgres"]
+postgres = []
+test-utils = []
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+debug = false
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[workspace]
+members = [
+    "crates/contract-templates",
+    "crates/enclave-runtime",
+    "crates/model-training",
+    "crates/audit-engine",
+]
