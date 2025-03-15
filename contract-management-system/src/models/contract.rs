@@ -3,199 +3,144 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use sea_orm::entity::prelude::*;
 
+use crate::auth::did::SignatureProof;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContractSignature {
+    pub id: Uuid,
+    pub contract_id: Uuid,
+    pub signer_did: String,
+    pub signature: String,
+    pub signature_type: SignatureType,
+    pub verification_method: String,
+    pub signed_at: DateTime<Utc>,
+    pub proof: SignatureProof,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum SignatureType {
+    Ed25519,
+    EcdsaSecp256k1,
+}
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "contracts")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+    #[sea_orm(primary_key)]
     pub id: Uuid,
     pub title: String,
     pub description: String,
-    #[sea_orm(column_type = "Text")]
+    pub provider_did: String,
+    pub consumer_did: String,
+    pub terms: String,
     pub status: ContractStatus,
-    #[sea_orm(column_type = "Text")]
-    pub contract_type: ContractType,
+    pub valid_from: DateTime<Utc>,
+    pub valid_until: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     #[sea_orm(column_type = "JsonBinary")]
-    pub terms: ContractTerms,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
-    pub valid_from: DateTime,
-    pub valid_until: Option<DateTime>,
+    pub signatures: Vec<ContractSignature>,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub metadata: serde_json::Value,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-    #[sea_orm(has_many = "super::party::Entity")]
-    Parties,
-}
-
-impl Related<super::party::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Parties.def()
-    }
-}
-
-impl ActiveModelBehavior for ActiveModel {}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumIter, DeriveActiveEnum)]
-#[sea_orm(rs_type = "String", db_type = "String(Some(50))")]
+#[derive(Debug, Clone, PartialEq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "String(Some(1))")]
 pub enum ContractStatus {
-    #[sea_orm(string_value = "DRAFT")]
+    #[sea_orm(string_value = "D")]
     Draft,
-    #[sea_orm(string_value = "PENDING_APPROVAL")]
-    PendingApproval,
-    #[sea_orm(string_value = "ACTIVE")]
+    #[sea_orm(string_value = "P")]
+    PendingSignatures,
+    #[sea_orm(string_value = "A")]
     Active,
-    #[sea_orm(string_value = "EXPIRED")]
-    Expired,
-    #[sea_orm(string_value = "TERMINATED")]
+    #[sea_orm(string_value = "S")]
+    Suspended,
+    #[sea_orm(string_value = "T")]
     Terminated,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumIter, DeriveActiveEnum)]
-#[sea_orm(rs_type = "String", db_type = "String(Some(50))")]
-pub enum ContractType {
-    #[sea_orm(string_value = "DATA_SHARING")]
-    DataSharing,
-    #[sea_orm(string_value = "MODEL_TRAINING")]
-    ModelTraining,
-    #[sea_orm(string_value = "RESULT_SHARING")]
-    ResultSharing,
-    #[sea_orm(string_value = "HYBRID")]
-    Hybrid,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContractTerms {
-    pub data_usage_terms: DataUsageTerms,
-    pub security_requirements: SecurityRequirements,
-    pub compliance_requirements: Vec<ComplianceRequirement>,
-    pub model_training_terms: ModelTrainingTerms,
-}
-
-impl Default for ContractTerms {
-    fn default() -> Self {
-        Self {
-            data_usage_terms: DataUsageTerms::default(),
-            security_requirements: SecurityRequirements::default(),
-            compliance_requirements: Vec::new(),
-            model_training_terms: ModelTrainingTerms::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct DataUsageTerms {
-    pub allowed_purposes: Vec<String>,
-    pub usage_restrictions: Vec<String>,
-    pub retention_period: i32,
-    pub data_handling_requirements: Vec<String>,
-}
-
-impl Default for DataUsageTerms {
-    fn default() -> Self {
-        Self {
-            allowed_purposes: Vec::new(),
-            usage_restrictions: Vec::new(),
-            retention_period: 365,
-            data_handling_requirements: Vec::new(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SecurityRequirements {
-    pub encryption_level: EncryptionLevel,
-    pub access_controls: Vec<String>,
-    pub audit_requirements: Vec<String>,
-}
-
-impl Default for SecurityRequirements {
-    fn default() -> Self {
-        Self {
-            encryption_level: EncryptionLevel::Standard,
-            access_controls: Vec::new(),
-            audit_requirements: Vec::new(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum EncryptionLevel {
-    Standard,
-    High,
-    Military,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ComplianceRequirement {
-    pub regulation: String,
-    pub requirements: Vec<String>,
-    pub verification_method: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ModelTrainingTerms {
-    pub allowed_algorithms: Vec<String>,
-    pub performance_requirements: Vec<String>,
-    pub resource_limits: ResourceLimits,
-    pub output_restrictions: Vec<String>,
-}
-
-impl Default for ModelTrainingTerms {
-    fn default() -> Self {
-        Self {
-            allowed_algorithms: Vec::new(),
-            performance_requirements: Vec::new(),
-            resource_limits: ResourceLimits::default(),
-            output_restrictions: Vec::new(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ResourceLimits {
-    pub max_cpu_cores: i32,
-    pub max_memory_gb: i32,
-    pub max_training_time_hours: i32,
-}
-
-impl Default for ResourceLimits {
-    fn default() -> Self {
-        Self {
-            max_cpu_cores: 4,
-            max_memory_gb: 16,
-            max_training_time_hours: 24,
-        }
-    }
 }
 
 impl Model {
     pub fn new(
         title: String,
         description: String,
-        contract_type: ContractType,
-        terms: ContractTerms,
-        valid_from: DateTime,
-        valid_until: Option<DateTime>,
+        provider_did: String,
+        consumer_did: String,
+        terms: String,
+        valid_from: DateTime<Utc>,
+        valid_until: Option<DateTime<Utc>>,
     ) -> Self {
         Self {
             id: Uuid::new_v4(),
             title,
             description,
-            status: ContractStatus::Draft,
-            contract_type,
+            provider_did,
+            consumer_did,
             terms,
-            created_at: chrono::Utc::now(),
-            updated_at: chrono::Utc::now(),
+            status: ContractStatus::Draft,
             valid_from,
             valid_until,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            signatures: Vec::new(),
+            metadata: serde_json::Value::Object(serde_json::Map::new()),
         }
     }
 
-    pub fn is_valid(&self) -> bool {
-        let now = chrono::Utc::now();
-        now >= self.valid_from
-            && self.valid_until.map_or(true, |end| now <= end)
-            && self.status == ContractStatus::Active
+    pub fn generate_signing_message(&self) -> String {
+        format!(
+            "Contract Signature Request\n\
+             Contract ID: {}\n\
+             Title: {}\n\
+             Provider DID: {}\n\
+             Consumer DID: {}\n\
+             Valid From: {}\n\
+             Terms Hash: {}\n\
+             Timestamp: {}",
+            self.id,
+            self.title,
+            self.provider_did,
+            self.consumer_did,
+            self.valid_from,
+            sha256::digest(&self.terms),
+            Utc::now()
+        )
     }
-} 
+
+    pub fn add_signature(&mut self, signature: ContractSignature) -> Result<(), String> {
+        // Verify signer is authorized
+        if signature.signer_did != self.provider_did && signature.signer_did != self.consumer_did {
+            return Err("Unauthorized signer".to_string());
+        }
+
+        // Check for duplicate signatures
+        if self.signatures.iter().any(|s| s.signer_did == signature.signer_did) {
+            return Err("Contract already signed by this DID".to_string());
+        }
+
+        // Add signature
+        self.signatures.push(signature);
+
+        // Update contract status
+        self.status = match self.signatures.len() {
+            1 => ContractStatus::PendingSignatures,
+            2 => ContractStatus::Active,
+            _ => self.status.clone(),
+        };
+
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+
+    pub fn is_signed_by(&self, did: &str) -> bool {
+        self.signatures.iter().any(|s| s.signer_did == did)
+    }
+
+    pub fn is_fully_signed(&self) -> bool {
+        self.signatures.len() == 2
+    }
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
+
+impl ActiveModelBehavior for ActiveModel {} 
