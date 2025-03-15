@@ -1,389 +1,210 @@
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use anyhow::{Context, Result};
-use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, Set};
-use crate::models::contracts::{self, Entity as Contract};
-use crate::models::contract_signatures::{self, Entity as ContractSignature};
-use crate::iam::audit::{AuditEvent, AuditEventType};
+use validator::Validate;
+use crate::models::{ContractStatus, ContractType, SecurityRequirements};
+use crate::services::contracts::ContractService;
+use crate::auth::AuthGuard;
+use crate::error::ApiError;
 
-use crate::models::{Contract, ContractStatus, ContractType};
-
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateContractRequest {
+    #[validate(length(min = 1, max = 255))]
     pub title: String,
+    #[validate(length(min = 1, max = 1000))]
     pub description: String,
     pub contract_type: ContractType,
-    pub parties: Vec<PartyInput>,
-    pub terms: ContractTermsInput,
-    pub valid_from: chrono::DateTime<chrono::Utc>,
-    pub valid_until: Option<chrono::DateTime<chrono::Utc>>,
+    pub provider_id: Option<Uuid>,
+    pub consumer_id: Option<Uuid>,
+    pub terms: ContractTerms,
+    #[validate(custom = "validate_date")]
+    pub valid_from: String,
+    pub valid_until: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PartyInput {
-    pub name: String,
-    pub role: String,
-    pub contact_info: ContactInfoInput,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ContactInfoInput {
-    pub email: String,
-    pub phone: Option<String>,
-    pub organization: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ContractTermsInput {
-    pub data_usage_terms: DataUsageTermsInput,
-    pub security_requirements: SecurityRequirementsInput,
-    pub compliance_requirements: Vec<ComplianceRequirementInput>,
-    pub model_training_terms: ModelTrainingTermsInput,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DataUsageTermsInput {
-    pub allowed_purposes: Vec<String>,
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ContractTerms {
+    pub data_access_scope: Vec<String>,
     pub usage_restrictions: Vec<String>,
-    pub retention_period: i32,
-    pub data_handling_requirements: Vec<String>,
+    #[validate(range(min = 1, max = 3650))]
+    pub retention_period_days: i32,
+    pub security_requirements: SecurityRequirements,
+    pub compliance_requirements: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SecurityRequirementsInput {
-    pub encryption_level: String,
-    pub access_controls: Vec<String>,
-    pub audit_requirements: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ComplianceRequirementInput {
-    pub regulation: String,
-    pub requirements: Vec<String>,
-    pub verification_method: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ModelTrainingTermsInput {
-    pub allowed_algorithms: Vec<String>,
-    pub performance_requirements: Vec<String>,
-    pub resource_limits: ResourceLimitsInput,
-    pub output_restrictions: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ResourceLimitsInput {
-    pub max_cpu_cores: i32,
-    pub max_memory_gb: i32,
-    pub max_training_time_hours: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct UpdateContractRequest {
+    #[validate(length(min = 1, max = 255))]
     pub title: Option<String>,
+    #[validate(length(min = 1, max = 1000))]
     pub description: Option<String>,
     pub status: Option<ContractStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ContractData {
-    pub id: Option<Uuid>,
+pub struct ContractResponse {
+    pub id: Uuid,
     pub title: String,
     pub description: String,
+    pub status: ContractStatus,
+    pub contract_type: ContractType,
     pub provider_id: Uuid,
     pub consumer_id: Uuid,
-    pub terms: String,
+    pub terms: ContractTerms,
+    pub created_at: String,
+    pub updated_at: String,
+    pub valid_from: String,
+    pub valid_until: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContractListResponse {
+    pub contracts: Vec<ContractSummary>,
+    pub total: usize,
+    pub page: usize,
+    pub per_page: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContractSummary {
+    pub id: Uuid,
+    pub title: String,
+    pub description: String,
     pub status: ContractStatus,
-    pub valid_from: chrono::DateTime<chrono::Utc>,
-    pub valid_until: chrono::DateTime<chrono::Utc>,
+    pub created_at: String,
+    pub provider_name: String,
+    pub consumer_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub enum ContractStatus {
-    Draft,
-    PendingSignature,
-    Active,
-    Completed,
-    Terminated,
-}
-
-pub struct ContractService {
-    db: DatabaseConnection,
-}
-
-impl ContractService {
-    pub fn new(db: DatabaseConnection) -> Self {
-        Self { db }
-    }
-
-    pub async fn get_contracts(&self, filters: ContractFilters) -> Result<Vec<ContractData>> {
-        let mut query = Contract::find();
-
-        if let Some(provider_id) = filters.provider_id {
-            query = query.filter(contracts::Column::ProviderId.eq(provider_id));
-        }
-
-        if let Some(consumer_id) = filters.consumer_id {
-            query = query.filter(contracts::Column::ConsumerId.eq(consumer_id));
-        }
-
-        if let Some(status) = filters.status {
-            query = query.filter(contracts::Column::Status.eq(status));
-        }
-
-        let contracts = query
-            .all(&self.db)
-            .await
-            .context("Failed to fetch contracts")?;
-
-        Ok(contracts
-            .into_iter()
-            .map(|c| ContractData {
-                id: Some(c.id),
-                title: c.title,
-                description: c.description,
-                provider_id: c.provider_id,
-                consumer_id: c.consumer_id,
-                terms: c.terms,
-                status: c.status,
-                valid_from: c.valid_from,
-                valid_until: c.valid_until,
-            })
-            .collect())
-    }
-
-    pub async fn get_contract(&self, id: Uuid) -> Result<Option<ContractData>> {
-        let contract = Contract::find_by_id(id)
-            .one(&self.db)
-            .await
-            .context("Failed to fetch contract")?;
-
-        Ok(contract.map(|c| ContractData {
-            id: Some(c.id),
-            title: c.title,
-            description: c.description,
-            provider_id: c.provider_id,
-            consumer_id: c.consumer_id,
-            terms: c.terms,
-            status: c.status,
-            valid_from: c.valid_from,
-            valid_until: c.valid_until,
-        }))
-    }
-
-    pub async fn create_contract(&self, data: ContractData) -> Result<Uuid> {
-        let contract = contracts::ActiveModel {
-            id: Set(Uuid::new_v4()),
-            title: Set(data.title),
-            description: Set(data.description),
-            provider_id: Set(data.provider_id),
-            consumer_id: Set(data.consumer_id),
-            terms: Set(data.terms),
-            status: Set(ContractStatus::Draft),
-            valid_from: Set(data.valid_from),
-            valid_until: Set(data.valid_until),
-            created_at: Set(chrono::Utc::now()),
-            updated_at: Set(chrono::Utc::now()),
-        };
-
-        let result = Contract::insert(contract)
-            .exec(&self.db)
-            .await
-            .context("Failed to create contract")?;
-
-        // Log audit event
-        AuditEvent::new(
-            AuditEventType::ContractCreation,
-            Some(result.last_insert_id),
-            "Contract created successfully",
-        )
-        .log()
-        .await?;
-
-        Ok(result.last_insert_id)
-    }
-
-    pub async fn update_contract(&self, id: Uuid, data: ContractData) -> Result<()> {
-        let contract = Contract::find_by_id(id)
-            .one(&self.db)
-            .await
-            .context("Failed to fetch contract")?
-            .ok_or_else(|| anyhow::anyhow!("Contract not found"))?;
-
-        let mut contract: contracts::ActiveModel = contract.into();
-
-        contract.title = Set(data.title);
-        contract.description = Set(data.description);
-        contract.terms = Set(data.terms);
-        contract.valid_from = Set(data.valid_from);
-        contract.valid_until = Set(data.valid_until);
-        contract.updated_at = Set(chrono::Utc::now());
-
-        Contract::update(contract)
-            .exec(&self.db)
-            .await
-            .context("Failed to update contract")?;
-
-        // Log audit event
-        AuditEvent::new(
-            AuditEventType::ContractUpdate,
-            Some(id),
-            "Contract updated successfully",
-        )
-        .log()
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn delete_contract(&self, id: Uuid) -> Result<()> {
-        Contract::delete_by_id(id)
-            .exec(&self.db)
-            .await
-            .context("Failed to delete contract")?;
-
-        // Log audit event
-        AuditEvent::new(
-            AuditEventType::ContractDeletion,
-            Some(id),
-            "Contract deleted successfully",
-        )
-        .log()
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn sign_contract(&self, id: Uuid, signer_id: Uuid, signature: String) -> Result<()> {
-        let contract = Contract::find_by_id(id)
-            .one(&self.db)
-            .await
-            .context("Failed to fetch contract")?
-            .ok_or_else(|| anyhow::anyhow!("Contract not found"))?;
-
-        // Verify contract is in signable state
-        if contract.status != ContractStatus::PendingSignature {
-            return Err(anyhow::anyhow!("Contract is not in signable state"));
-        }
-
-        // Create signature record
-        let signature = contract_signatures::ActiveModel {
-            id: Set(Uuid::new_v4()),
-            contract_id: Set(id),
-            signer_id: Set(signer_id),
-            signature: Set(signature),
-            signed_at: Set(chrono::Utc::now()),
-        };
-
-        ContractSignature::insert(signature)
-            .exec(&self.db)
-            .await
-            .context("Failed to save contract signature")?;
-
-        // Check if all required signatures are collected
-        let signatures = ContractSignature::find()
-            .filter(contract_signatures::Column::ContractId.eq(id))
-            .all(&self.db)
-            .await
-            .context("Failed to fetch signatures")?;
-
-        // If both provider and consumer have signed, activate the contract
-        if signatures.len() == 2 {
-            self.activate_contract(id).await?;
-        }
-
-        // Log audit event
-        AuditEvent::new(
-            AuditEventType::ContractSigning,
-            Some(id),
-            "Contract signed successfully",
-        )
-        .log()
-        .await?;
-
-        Ok(())
-    }
-
-    async fn activate_contract(&self, id: Uuid) -> Result<()> {
-        let mut contract = Contract::find_by_id(id)
-            .one(&self.db)
-            .await
-            .context("Failed to fetch contract")?
-            .ok_or_else(|| anyhow::anyhow!("Contract not found"))?;
-
-        let mut active_model: contracts::ActiveModel = contract.clone().into();
-        active_model.status = Set(ContractStatus::Active);
-        active_model.updated_at = Set(chrono::Utc::now());
-
-        Contract::update(active_model)
-            .exec(&self.db)
-            .await
-            .context("Failed to activate contract")?;
-
-        // Log audit event
-        AuditEvent::new(
-            AuditEventType::ContractActivation,
-            Some(id),
-            "Contract activated successfully",
-        )
-        .log()
-        .await?;
-
-        Ok(())
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct ContractFilters {
-    pub provider_id: Option<Uuid>,
-    pub consumer_id: Option<Uuid>,
+#[derive(Debug, Deserialize)]
+pub struct ContractFilter {
     pub status: Option<ContractStatus>,
+    pub search: Option<String>,
+    pub page: Option<usize>,
+    pub per_page: Option<usize>,
+}
+
+fn validate_date(date: &str) -> Result<(), validator::ValidationError> {
+    chrono::DateTime::parse_from_rfc3339(date)
+        .map_err(|_| validator::ValidationError::new("invalid_date"))?;
+    Ok(())
 }
 
 #[get("/contracts")]
-pub async fn list_contracts() -> impl Responder {
-    // TODO: Implement database query
-    HttpResponse::Ok().json(vec![])
+pub async fn list_contracts(
+    filter: web::Query<ContractFilter>,
+    service: web::Data<ContractService>,
+    _: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    let page = filter.page.unwrap_or(1);
+    let per_page = filter.per_page.unwrap_or(10).min(100);
+
+    let (contracts, total) = service
+        .list_contracts(
+            page,
+            per_page,
+            filter.status.as_ref(),
+            filter.search.as_deref(),
+        )
+        .await?;
+
+    Ok(HttpResponse::Ok().json(ContractListResponse {
+        contracts,
+        total,
+        page,
+        per_page,
+    }))
 }
 
 #[get("/contracts/{id}")]
-pub async fn get_contract(id: web::Path<Uuid>) -> impl Responder {
-    // TODO: Implement database query
-    HttpResponse::NotFound().finish()
+pub async fn get_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    _: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    let contract = service.get_contract(*id).await?;
+    Ok(HttpResponse::Ok().json(contract))
 }
 
 #[post("/contracts")]
-pub async fn create_contract(contract: web::Json<CreateContractRequest>) -> impl Responder {
-    // TODO: Implement contract creation
-    HttpResponse::Created().json(contract.0)
+pub async fn create_contract(
+    contract: web::Json<CreateContractRequest>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    contract.validate()?;
+    
+    let contract_id = service
+        .create_contract(auth.user_id, contract.into_inner())
+        .await?;
+
+    Ok(HttpResponse::Created().json(contract_id))
 }
 
 #[put("/contracts/{id}")]
 pub async fn update_contract(
     id: web::Path<Uuid>,
     contract: web::Json<UpdateContractRequest>,
-) -> impl Responder {
-    // TODO: Implement contract update
-    HttpResponse::Ok().json(contract.0)
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    contract.validate()?;
+    
+    service
+        .update_contract(*id, auth.user_id, contract.into_inner())
+        .await?;
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[delete("/contracts/{id}")]
-pub async fn delete_contract(id: web::Path<Uuid>) -> impl Responder {
-    // TODO: Implement contract deletion
-    HttpResponse::NoContent().finish()
+pub async fn delete_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    service.delete_contract(*id, auth.user_id).await?;
+    Ok(HttpResponse::NoContent().finish())
 }
 
 #[post("/contracts/{id}/sign")]
-pub async fn sign_contract(id: web::Path<Uuid>) -> impl Responder {
-    // TODO: Implement contract signing
-    HttpResponse::Ok().finish()
+pub async fn sign_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    service.sign_contract(*id, auth.user_id).await?;
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[post("/contracts/{id}/terminate")]
+pub async fn terminate_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    service.terminate_contract(*id, auth.user_id).await?;
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[post("/contracts/{id}/suspend")]
+pub async fn suspend_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    service.suspend_contract(*id, auth.user_id).await?;
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[post("/contracts/{id}/activate")]
-pub async fn activate_contract(id: web::Path<Uuid>) -> impl Responder {
-    // TODO: Implement contract activation
-    HttpResponse::Ok().finish()
+pub async fn activate_contract(
+    id: web::Path<Uuid>,
+    service: web::Data<ContractService>,
+    auth: AuthGuard,
+) -> Result<impl Responder, ApiError> {
+    service.activate_contract(*id, auth.user_id).await?;
+    Ok(HttpResponse::Ok().finish())
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -395,6 +216,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .service(update_contract)
             .service(delete_contract)
             .service(sign_contract)
+            .service(terminate_contract)
+            .service(suspend_contract)
             .service(activate_contract),
     );
 }
