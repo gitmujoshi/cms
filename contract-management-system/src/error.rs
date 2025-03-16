@@ -3,6 +3,54 @@ use sea_orm::DbErr;
 use serde::Serialize;
 use std::fmt;
 use argon2::password_hash;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum AppError {
+    #[error("Database error: {0}")]
+    DatabaseError(#[from] sea_orm::DbErr),
+
+    #[error("Authentication error: {0}")]
+    AuthError(String),
+
+    #[error("Validation error: {0}")]
+    ValidationError(String),
+
+    #[error("Not found: {0}")]
+    NotFound(String),
+
+    #[error("Blockchain error: {0}")]
+    BlockchainError(String),
+
+    #[error("Contract state error: {0}")]
+    ContractStateError(String),
+
+    #[error("Signature verification error: {0}")]
+    SignatureError(String),
+
+    #[error("Internal error: {0}")]
+    InternalError(String),
+}
+
+pub type Result<T> = std::result::Result<T, AppError>;
+
+impl From<ethers::prelude::ProviderError> for AppError {
+    fn from(err: ethers::prelude::ProviderError) -> Self {
+        AppError::BlockchainError(err.to_string())
+    }
+}
+
+impl From<ethers::prelude::ContractError<ethers::providers::Provider<ethers::providers::Http>>> for AppError {
+    fn from(err: ethers::prelude::ContractError<ethers::providers::Provider<ethers::providers::Http>>) -> Self {
+        AppError::BlockchainError(err.to_string())
+    }
+}
+
+impl From<ethers::signers::WalletError> for AppError {
+    fn from(err: ethers::signers::WalletError) -> Self {
+        AppError::BlockchainError(format!("Wallet error: {}", err))
+    }
+}
 
 #[derive(Debug)]
 pub enum ApiError {

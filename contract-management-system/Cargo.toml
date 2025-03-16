@@ -73,12 +73,25 @@ ndarray = "0.15"
 handlebars = "5.1"
 tera = "1.19"
 
+# Blockchain
+sea-orm = { version = "0.12", features = ["sqlx-postgres", "runtime-tokio-native-tls", "macros"] }
+axum = "0.7"
+argon2 = "0.5"
+dotenv = "0.15"
+validator = { version = "0.16", features = ["derive"] }
+ethers = { version = "2.0", features = ["rustls"] }
+sha3 = "0.10"
+hex = "0.4"
+bs58 = "0.4"
+
 [dev-dependencies]
 mockall = "0.12"
 rstest = "0.18"
 test-case = "3.3"
 wiremock = "0.5"
 fake = { version = "2.9", features = ['derive'] }
+tokio-test = "0.4"
+serial_test = "2.0"
 
 [features]
 default = ["postgres"]

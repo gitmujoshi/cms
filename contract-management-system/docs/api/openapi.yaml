@@ -238,7 +238,6 @@ components:
         valid_until:
           type: string
           format: date-time
-          nullable: true
         created_at:
           type: string
           format: date-time
@@ -266,6 +265,44 @@ components:
           type: string
         consumer_name:
           type: string
+
+    Signature:
+      type: object
+      properties:
+        signer_did:
+          type: string
+        signature:
+          type: string
+        signed_at:
+          type: string
+          format: date-time
+        verification_method:
+          type: string
+
+    BlockchainInfo:
+      type: object
+      properties:
+        content_hash:
+          type: string
+        transaction_hash:
+          type: string
+        event_count:
+          type: integer
+        last_updated:
+          type: string
+          format: date-time
+
+    ContractEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum: [CREATED, SIGNED, UPDATED, VOIDED]
+        data:
+          type: object
+        timestamp:
+          type: integer
+          format: int64
 
 security:
   - bearerAuth: []
@@ -588,6 +625,41 @@ paths:
                   total:
                     type: integer
 
+    post:
+      tags:
+        - Contracts
+      summary: Create a new contract
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                consumer_did:
+                  type: string
+                terms:
+                  type: string
+                valid_from:
+                  type: string
+                  format: date-time
+                valid_until:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Contract created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
   /contracts/{id}:
     parameters:
       - name: id
@@ -601,6 +673,8 @@ paths:
       tags:
         - Contracts
       summary: Get contract details
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Contract details
@@ -608,6 +682,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contract'
+        '404':
+          description: Contract not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Contracts
+      summary: Update contract
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contract'
+      responses:
+        '200':
+          description: Contract updated
+        '404':
+          description: Contract not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Contracts
+      summary: Delete contract
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Contract deleted
         '404':
           description: Contract not found
           content:
@@ -627,10 +739,27 @@ paths:
     post:
       tags:
         - Contracts
-      summary: Sign contract
+      summary: Sign a contract
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                signature:
+                  type: string
+                verification_method:
+                  type: string
       responses:
         '200':
           description: Contract signed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
         '404':
           description: Contract not found
           content:
@@ -644,31 +773,114 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /contracts/{id}/terminate:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    
+  /contracts/{id}/verify:
+    get:
+      tags:
+        - Contracts
+      summary: Verify contract signatures and state
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  blockchain_verified:
+                    type: boolean
+                  signature_count:
+                    type: integer
+
+  /contracts/{id}/events:
+    get:
+      tags:
+        - Contracts
+      summary: Get contract events from blockchain
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Contract events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractEvent'
+
+  /contracts/{id}/void:
     post:
       tags:
         - Contracts
-      summary: Terminate contract
+      summary: Void a contract
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
       responses:
         '200':
-          description: Contract terminated
-        '404':
-          description: Contract not found
+          description: Contract voided
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: Invalid contract state
+                $ref: '#/components/schemas/Contract'
+
+  /blockchain/health:
+    get:
+      tags:
+        - Blockchain
+      summary: Check blockchain connection health
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Health check result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error' 
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  node_info:
+                    type: object
+                    properties:
+                      block_height:
+                        type: integer
+                      sync_status:
+                        type: string
+                      peer_count:
+                        type: integer 
