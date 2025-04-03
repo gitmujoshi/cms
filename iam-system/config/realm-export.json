@@ -1,0 +1,61 @@
+{
+  "realm": "contract-management",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role with full access"
+      },
+      {
+        "name": "manager",
+        "description": "Manager role with elevated privileges"
+      },
+      {
+        "name": "user",
+        "description": "Regular user role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "contract-management-client",
+      "enabled": true,
+      "publicClient": false,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true
+    }
+  ],
+  "groups": [
+    {
+      "name": "Administrators",
+      "realmRoles": [
+        "admin"
+      ]
+    },
+    {
+      "name": "Managers",
+      "realmRoles": [
+        "manager"
+      ]
+    },
+    {
+      "name": "Users",
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ],
+  "defaultRoles": [
+    "user"
+  ]
+} 
