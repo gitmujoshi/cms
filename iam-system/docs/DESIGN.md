@@ -444,7 +444,7 @@ This flowchart demonstrates the backup strategy, including daily backups of the 
 graph TD
     A[Daily Backup] --> B[Database Backup]
     A --> C[Configuration Backup]
-    A --> D[Realm Export: /admin/realms/{realm}/partial-export]
+    A --> D["Realm Export<br/>/admin/realms/{realm}/partial-export"]
     B --> E[Backup Storage]
     C --> E
     D --> E
