@@ -226,26 +226,29 @@ These operations can be performed via the Keycloak Admin Console or programmatic
 
 ### 4.1 API Design
 
-This sequence diagram outlines the main API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair.
+This sequence diagram outlines the main API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair with the specific endpoint.
 
 [Keycloak REST API](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html) | [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html)
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant API
+    participant AuthAPI as /auth
+    participant TokenAPI as /token
+    participant UserInfoAPI as /userinfo
+    participant AdminAPI as /admin
 
-    Client->>API: POST /auth (credentials)
-    API-->>Client: Auth response (token or error)
+    Client->>AuthAPI: POST /auth (credentials)
+    AuthAPI-->>Client: Auth response (token or error)
 
-    Client->>API: POST /token (refresh or exchange)
-    API-->>Client: Token response
+    Client->>TokenAPI: POST /token (refresh/exchange)
+    TokenAPI-->>Client: Token response
 
-    Client->>API: GET /userinfo (with token)
-    API-->>Client: User info
+    Client->>UserInfoAPI: GET /userinfo (with token)
+    UserInfoAPI-->>Client: User info
 
-    Client->>API: Admin endpoints (/admin)
-    API-->>Client: Admin response
+    Client->>AdminAPI: Admin operations (with token)
+    AdminAPI-->>Client: Admin response
 ```
 
 ### 4.2 Protocol Support
