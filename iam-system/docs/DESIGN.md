@@ -3,6 +3,11 @@
 ## 1. Authentication Design
 
 ### 1.1 Authentication Flow
+
+This sequence diagram illustrates the authentication process using Keycloak as the identity provider. The client sends an authentication request (such as username and password) to Keycloak. Keycloak validates the credentials against the database. If valid, Keycloak issues a JWT token to the client for subsequent requests.
+
+[Keycloak Authentication Flows](https://www.keycloak.org/docs/latest/server_admin/#authentication-flows) | [JWT Introduction](https://jwt.io/introduction/)
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -16,6 +21,7 @@ sequenceDiagram
 ```
 
 ### 1.2 Authentication Methods
+
 - Username/Password
 - OAuth 2.0
 - OpenID Connect
@@ -25,6 +31,11 @@ sequenceDiagram
 ## 2. Authorization Design
 
 ### 2.1 Authorization Flow
+
+This sequence diagram shows how authorization is handled. The client requests an access token from Keycloak. After receiving the token, the client uses it to access a protected resource. The resource server validates the token with Keycloak before granting access.
+
+[OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) | [Keycloak Authorization Services](https://www.keycloak.org/docs/latest/authorization_services/)
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -40,6 +51,7 @@ sequenceDiagram
 ```
 
 ### 2.2 Authorization Models
+
 - Role-Based Access Control (RBAC)
 - Group-Based Permissions
 - Fine-Grained Access Control
@@ -48,6 +60,11 @@ sequenceDiagram
 ## 3. Data Model Design
 
 ### 3.1 Realm Structure
+
+This class diagram represents the structure of a Keycloak realm, which is a logical grouping of users, roles, clients, and groups. Realms allow for multi-tenancy and isolation of authentication and authorization data.
+
+[Keycloak Realms](https://www.keycloak.org/docs/latest/server_admin/#realms) | [Keycloak Data Model](https://www.keycloak.org/docs/latest/server_development/#_model)
+
 ```mermaid
 classDiagram
     class Realm {
@@ -78,6 +95,11 @@ classDiagram
 ```
 
 ### 3.2 User Model
+
+This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, and custom attributes. This model supports flexible user management and attribute storage.
+
+[Keycloak User Storage](https://www.keycloak.org/docs/latest/server_development/#_user-storage-spi) | [User Federation](https://www.keycloak.org/docs/latest/server_admin/#user-federation)
+
 ```mermaid
 classDiagram
     class User {
@@ -94,6 +116,11 @@ classDiagram
 ## 4. Integration Design
 
 ### 4.1 API Design
+
+This sequence diagram outlines the main API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair.
+
+[Keycloak REST API](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html) | [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html)
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -112,19 +139,8 @@ sequenceDiagram
     API-->>Client: Admin response
 ```
 
-**You can adjust the endpoints and flow as needed for your actual API logic.**
-
----
-
-### Summary
-
-- If you want to show the order and interaction, use `sequenceDiagram` (like 2.1).
-- If you just want to show relationships, use `graph`.
-- For consistency and clarity, using `sequenceDiagram` for 4.1 is a good idea.
-
-Let me know if you want to further customize the sequence or need help with another section!
-
 ### 4.2 Protocol Support
+
 - OAuth 2.0
 - OpenID Connect
 - SAML 2.0
@@ -133,6 +149,11 @@ Let me know if you want to further customize the sequence or need help with anot
 ## 5. Security Design
 
 ### 5.1 Token Design
+
+This class diagram shows the structure of tokens used in the system. JWT tokens consist of a header, payload, and signature, and provide methods for validation and claim retrieval. The Token class represents access and refresh tokens, their expiry, and type.
+
+[JSON Web Token (JWT) Specification](https://datatracker.ietf.org/doc/html/rfc7519) | [Keycloak Token Types](https://www.keycloak.org/docs/latest/server_admin/#_tokens)
+
 ```mermaid
 classDiagram
     class JWT {
@@ -152,6 +173,7 @@ classDiagram
 ```
 
 ### 5.2 Security Features
+
 - Password Policies
 - Brute Force Protection
 - Session Management
@@ -161,6 +183,11 @@ classDiagram
 ## 6. Backup and Recovery Design
 
 ### 6.1 Backup Strategy
+
+This flowchart demonstrates the backup strategy, including daily backups of the database, configuration, and realm exports, all stored in a backup storage location. This ensures disaster recovery and data integrity.
+
+[Keycloak Backup and Restore](https://www.keycloak.org/docs/latest/server_admin/#_backup_restore) | [Database Backup Best Practices](https://www.postgresql.org/docs/current/backup.html)
+
 ```mermaid
 graph TD
     A[Daily Backup] --> B[Database Backup]
@@ -172,6 +199,7 @@ graph TD
 ```
 
 ### 6.2 Recovery Procedures
+
 - Database Restoration
 - Configuration Restoration
 - Realm Import
@@ -180,6 +208,11 @@ graph TD
 ## 7. Performance Design
 
 ### 7.1 Caching Design
+
+This flowchart shows the caching strategy, where different types of caches (token, session, permission, realm) are stored in Redis. This improves performance and scalability by reducing database load.
+
+[Keycloak Caching](https://www.keycloak.org/docs/latest/server_installation/#cache) | [Redis Documentation](https://redis.io/docs/)
+
 ```mermaid
 graph TD
     A[Token Cache] --> B[Redis]
@@ -189,6 +222,7 @@ graph TD
 ```
 
 ### 7.2 Scaling Design
+
 - Horizontal Scaling
 - Load Balancing
 - Database Sharding
@@ -197,6 +231,7 @@ graph TD
 ## 8. Future Design Considerations
 
 ### 8.1 Planned Features
+
 - Multi-Factor Authentication
 - Social Login Integration
 - Custom Authentication Flows
@@ -204,7 +239,8 @@ graph TD
 - Audit Logging Enhancements
 
 ### 8.2 Design Improvements
+
 - Microservices Architecture
 - Event-Driven Design
 - API Gateway Integration
-- Service Mesh Implementation 
+- Service Mesh Implementation
