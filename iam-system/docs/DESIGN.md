@@ -125,6 +125,63 @@ classDiagram
 
 These attributes enable the IAM system to support decentralized identity use cases, such as self-sovereign identity, verifiable credentials, and interoperability with blockchain-based identity systems.
 
+### 3.2.1 DID Usage and Integration with Blockchain-based Systems
+
+**Decentralized Identifiers (DIDs)** are globally unique identifiers that are created, owned, and controlled by the user, independent of any centralized authority. DIDs are often anchored on blockchain or distributed ledger systems, providing a tamper-evident and verifiable identity layer.
+
+#### How DIDs are Used in the IAM System
+
+- **User Registration:**  
+  During registration, a user can provide a DID or have one generated for them. The DID and its associated DID Document (which contains public keys and service endpoints) are stored as part of the user profile.
+
+- **Authentication:**  
+  Users can authenticate using cryptographic proofs (e.g., signing a challenge with their DID private key). The IAM system verifies the signature using the public key from the DID Document, which may be resolved from a blockchain.
+
+- **Verifiable Credentials:**  
+  The system can issue, request, or verify [Verifiable Credentials (VCs)](https://www.w3.org/TR/vc-data-model/) associated with a user's DID. These credentials can be used for access control, KYC, or other trust-based workflows.
+
+- **Interoperability:**  
+  By supporting multiple DID methods (e.g., `did:key`, `did:web`, `did:ion`), the system can interoperate with various blockchain networks (e.g., Ethereum, Bitcoin, Hyperledger, ION).
+
+#### Example DID-based Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant IAM
+    participant Blockchain
+
+    User->>IAM: Request login (with DID)
+    IAM->>User: Challenge (nonce)
+    User->>IAM: Signed challenge (using DID private key)
+    IAM->>Blockchain: Resolve DID Document & public key
+    Blockchain-->>IAM: DID Document
+    IAM-->>User: Authentication Success/Failure
+```
+
+#### Blockchain Integration
+
+- **DID Anchoring:**  
+  DIDs are registered and anchored on a blockchain, ensuring immutability and public verifiability.
+- **DID Resolution:**  
+  The IAM system can resolve a DID to its DID Document by querying the appropriate blockchain or DID method resolver.
+- **Credential Issuance & Verification:**  
+  Verifiable credentials can be issued by the IAM system and cryptographically signed using its own DID. Other parties can verify these credentials by resolving the issuer's DID on the blockchain.
+
+#### Benefits
+
+- **Self-sovereign identity:** Users control their own identifiers and credentials.
+- **Interoperability:** Works across different platforms and organizations.
+- **Security:** Cryptographic proofs and blockchain anchoring provide strong guarantees of authenticity and integrity.
+- **Privacy:** Users can selectively disclose information using VCs.
+
+**References:**
+- [W3C DID Core Specification](https://www.w3.org/TR/did-core/)
+- [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/)
+- [Microsoft ION (DID on Bitcoin)](https://identity.foundation/ion/)
+- [Hyperledger Indy](https://www.hyperledger.org/use/hyperledger-indy)
+- [Decentralized Identity Foundation](https://identity.foundation/)
+
 ### 3.3 User Registration and Management
 
 This section describes how users are registered and managed in Keycloak.
