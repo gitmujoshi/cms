@@ -101,9 +101,9 @@ classDiagram
 
 ### 3.2 User Model
 
-This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, custom attributes, and support for Decentralized Identifiers (DIDs). The addition of DID-related fields allows the system to integrate with decentralized identity frameworks, enabling users to be identified and verified using standards-based, self-sovereign identities.
+This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, custom attributes, and support for Decentralized Identifiers (DIDs) and public keys. The addition of DID-related fields and public key storage allows the system to integrate with decentralized identity frameworks, passwordless authentication, and cryptographic login flows.
 
-[Keycloak User Storage](https://www.keycloak.org/docs/latest/server_development/#_user-storage-spi) | [User Federation](https://www.keycloak.org/docs/latest/server_admin/#user-federation) | [Decentralized Identifiers (DIDs) W3C Spec](https://www.w3.org/TR/did-core/)
+[Keycloak User Storage](https://www.keycloak.org/docs/latest/server_development/#_user-storage-spi) | [User Federation](https://www.keycloak.org/docs/latest/server_admin/#user-federation) | [Decentralized Identifiers (DIDs) W3C Spec](https://www.w3.org/TR/did-core/) | [Keycloak User Attributes](https://www.keycloak.org/docs/latest/server_admin/#user-attributes)
 
 ```mermaid
 classDiagram
@@ -119,73 +119,53 @@ classDiagram
         +List~String~ didMethods       // Supported DID methods (e.g., "key", "web", "ion")
         +Map~String, String~ didDocs   // DID Documents or references
         +Boolean didVerified           // DID verification status
+        +String publicKey              // User's public key for cryptographic auth
     }
 ```
 
-**DID-related attributes:**
+**DID- and Public Key-related attributes:**
 - **did:** The user's Decentralized Identifier (DID), e.g., `did:ion:xyz...`
 - **didMethods:** List of DID methods supported or used by the user (e.g., `key`, `web`, `ion`).
 - **didDocs:** Map containing DID Documents or references to their storage locations.
 - **didVerified:** Boolean indicating whether the user's DID has been verified.
+- **publicKey:** The user's public key, used for cryptographic authentication (e.g., DID login, passwordless, WebAuthn).
 
-These attributes enable the IAM system to support decentralized identity use cases, such as self-sovereign identity, verifiable credentials, and interoperability with blockchain-based identity systems.
+These attributes enable the IAM system to support decentralized identity use cases, passwordless authentication, verifiable credentials, and interoperability with blockchain-based identity systems.
 
-### 3.2.1 DID Usage and Integration with Blockchain-based Systems
+---
 
-**Decentralized Identifiers (DIDs)** are globally unique identifiers that are created, owned, and controlled by the user, independent of any centralized authority. DIDs are often anchored on blockchain or distributed ledger systems, providing a tamper-evident and verifiable identity layer.
+#### Storing and Retrieving a User's Public Key in Keycloak
 
-#### How DIDs are Used in the IAM System
+You can store a user's public key as a custom attribute in Keycloak, either via the Admin Console or the REST API.
 
-- **User Registration:**  
-  During registration, a user can provide a DID or have one generated for them. The DID and its associated DID Document (which contains public keys and service endpoints) are stored as part of the user profile.
+**Example: Storing a Public Key via REST API**
 
-- **Authentication:**  
-  Users can authenticate using cryptographic proofs (e.g., signing a challenge with their DID private key). The IAM system verifies the signature using the public key from the DID Document, which may be resolved from a blockchain.
+**Request:**
+```http
+PUT /admin/realms/{realm}/users/{user-id}
+Content-Type: application/json
+Authorization: Bearer {admin-token}
 
-- **Verifiable Credentials:**  
-  The system can issue, request, or verify [Verifiable Credentials (VCs)](https://www.w3.org/TR/vc-data-model/) associated with a user's DID. These credentials can be used for access control, KYC, or other trust-based workflows.
-
-- **Interoperability:**  
-  By supporting multiple DID methods (e.g., `did:key`, `did:web`, `did:ion`), the system can interoperate with various blockchain networks (e.g., Ethereum, Bitcoin, Hyperledger, ION).
-
-#### Example DID-based Authentication Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant IAM
-    participant Blockchain
-
-    User->>IAM: Request login (with DID)
-    IAM->>User: Challenge (nonce)
-    User->>IAM: Signed challenge (using DID private key)
-    IAM->>Blockchain: Resolve DID Document & public key
-    Blockchain-->>IAM: DID Document
-    IAM-->>User: Authentication Success/Failure
+{
+  "attributes": {
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkq...\n-----END PUBLIC KEY-----"
+  }
+}
 ```
 
-#### Blockchain Integration
+**Retrieving the Public Key:**
+- When you fetch the user via the Admin REST API (`GET /admin/realms/{realm}/users/{user-id}`), the `attributes.publicKey` field will contain the stored public key.
 
-- **DID Anchoring:**  
-  DIDs are registered and anchored on a blockchain, ensuring immutability and public verifiability.
-- **DID Resolution:**  
-  The IAM system can resolve a DID to its DID Document by querying the appropriate blockchain or DID method resolver.
-- **Credential Issuance & Verification:**  
-  Verifiable credentials can be issued by the IAM system and cryptographically signed using its own DID. Other parties can verify these credentials by resolving the issuer's DID on the blockchain.
-
-#### Benefits
-
-- **Self-sovereign identity:** Users control their own identifiers and credentials.
-- **Interoperability:** Works across different platforms and organizations.
-- **Security:** Cryptographic proofs and blockchain anchoring provide strong guarantees of authenticity and integrity.
-- **Privacy:** Users can selectively disclose information using VCs.
+**Security Note:**  
+- Public keys are not secrets and are safe to store and expose for verification.
+- Never store private keys in Keycloak or any server-side system.
 
 **References:**
-- [W3C DID Core Specification](https://www.w3.org/TR/did-core/)
-- [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/)
-- [Microsoft ION (DID on Bitcoin)](https://identity.foundation/ion/)
-- [Hyperledger Indy](https://www.hyperledger.org/use/hyperledger-indy)
-- [Decentralized Identity Foundation](https://identity.foundation/)
+- [Keycloak User Attributes](https://www.keycloak.org/docs/latest/server_admin/#user-attributes)
+- [Keycloak Admin REST API: Users](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource)
+- [W3C DID Core Spec: Public Keys](https://www.w3.org/TR/did-core/#verification-methods)
+
+---
 
 ### 3.3 User Registration and Management
 
