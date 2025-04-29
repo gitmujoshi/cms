@@ -4,20 +4,24 @@
 
 ### 1.1 Authentication Flow
 
-This sequence diagram illustrates the authentication process using Keycloak as the identity provider. The client sends an authentication request (such as username and password) to Keycloak. Keycloak validates the credentials against the database. If valid, Keycloak issues a JWT token to the client for subsequent requests.
+This sequence diagram illustrates the authentication process using Keycloak as the identity provider, showing the actual endpoints involved. The client initiates authentication via the OpenID Connect authorization endpoint, receives an authorization code, and exchanges it for tokens at the token endpoint.
 
 [Keycloak Authentication Flows](https://www.keycloak.org/docs/latest/server_admin/#authentication-flows) | [JWT Introduction](https://jwt.io/introduction/)
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Keycloak
+    participant AuthEndpoint as /realms/{realm}/protocol/openid-connect/auth
+    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
     participant DB
-    
-    Client->>Keycloak: Authentication Request
-    Keycloak->>DB: Validate Credentials
-    DB-->>Keycloak: Credential Status
-    Keycloak->>Client: JWT Token
+
+    Client->>AuthEndpoint: GET /realms/{realm}/protocol/openid-connect/auth (login)
+    AuthEndpoint->>DB: Validate Credentials
+    DB-->>AuthEndpoint: Credential Status
+    AuthEndpoint-->>Client: Auth code / login page
+
+    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (exchange code)
+    TokenEndpoint-->>Client: JWT Token
 ```
 
 ### 1.2 Authentication Methods
@@ -32,22 +36,23 @@ sequenceDiagram
 
 ### 2.1 Authorization Flow
 
-This sequence diagram shows how authorization is handled. The client requests an access token from Keycloak. After receiving the token, the client uses it to access a protected resource. The resource server validates the token with Keycloak before granting access.
+This sequence diagram shows how authorization is handled using actual Keycloak endpoints. The client requests an access token from the token endpoint, uses it to access a protected resource, and the resource server validates the token (optionally using the userinfo endpoint).
 
 [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) | [Keycloak Authorization Services](https://www.keycloak.org/docs/latest/authorization_services/)
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Keycloak
-    participant Resource
-    
-    Client->>Keycloak: Request Access Token
-    Keycloak->>Client: Access Token
-    Client->>Resource: Access Request with Token
-    Resource->>Keycloak: Validate Token
-    Keycloak-->>Resource: Token Status
-    Resource->>Client: Resource Access
+    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
+    participant ResourceAPI as /resource
+    participant UserInfoEndpoint as /realms/{realm}/protocol/openid-connect/userinfo
+
+    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (get access token)
+    TokenEndpoint-->>Client: Access Token
+    Client->>ResourceAPI: GET /resource (with access token)
+    ResourceAPI->>UserInfoEndpoint: GET /realms/{realm}/protocol/openid-connect/userinfo (validate token)
+    UserInfoEndpoint-->>ResourceAPI: User info / token status
+    ResourceAPI-->>Client: Resource Access
 ```
 
 ### 2.2 Authorization Models
@@ -184,37 +189,49 @@ sequenceDiagram
 
 ### 3.3 User Registration and Management
 
-This section describes how users are registered and managed in Keycloak.
+This section describes how users are registered and managed in Keycloak, using actual endpoints for both self-service and admin-driven registration.
 
 #### 3.3.1 User Registration Flow
 
-This sequence diagram illustrates the process of registering a new user in the system. The client submits registration details to the Keycloak registration endpoint. Keycloak validates the input, creates the user in its database, and may trigger additional actions such as sending a verification email.
+This sequence diagram illustrates the process of registering a new user in the system, showing both self-service registration (if enabled) and admin-driven registration.
 
 [Keycloak User Registration](https://www.keycloak.org/docs/latest/server_admin/#user-registration) | [Keycloak REST API: Create User](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource)
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Keycloak
+    participant RegistrationEndpoint as /realms/{realm}/protocol/openid-connect/registrations
+    participant AdminEndpoint as /admin/realms/{realm}/users
     participant DB
 
-    Client->>Keycloak: POST /register (user details)
-    Keycloak->>DB: Create User
-    DB-->>Keycloak: User Created
-    Keycloak-->>Client: Registration Success / Verification Email
+    %% Self-service registration
+    Client->>RegistrationEndpoint: POST /realms/{realm}/protocol/openid-connect/registrations (user details)
+    RegistrationEndpoint->>DB: Create User
+    DB-->>RegistrationEndpoint: User Created
+    RegistrationEndpoint-->>Client: Registration Success / Verification Email
+
+    %% Admin-driven registration
+    Admin->>AdminEndpoint: POST /admin/realms/{realm}/users (user details)
+    AdminEndpoint->>DB: Create User
+    DB-->>AdminEndpoint: User Created
+    AdminEndpoint-->>Admin: Success/Failure
 ```
 
 #### 3.3.2 User Management Operations
 
 Keycloak provides a comprehensive set of user management features, including:
 
-- **Create User:** Admins or self-service registration can create new users.
-- **Update User:** Modify user attributes, roles, groups, or credentials.
-- **Delete User:** Remove users from the system.
-- **Enable/Disable User:** Temporarily deactivate or reactivate user accounts.
-- **Assign Roles/Groups:** Manage user permissions and group memberships.
-- **Password Reset:** Initiate password reset flows for users.
-- **Email Verification:** Send and manage email verification for new users.
+- **Create User:**  
+  - Admin: `POST /admin/realms/{realm}/users`
+  - Self-service: `POST /realms/{realm}/protocol/openid-connect/registrations` (if enabled)
+- **Update User:** `PUT /admin/realms/{realm}/users/{id}`
+- **Delete User:** `DELETE /admin/realms/{realm}/users/{id}`
+- **Enable/Disable User:** `PUT /admin/realms/{realm}/users/{id}`
+- **Assign Roles/Groups:**  
+  - Roles: `POST /admin/realms/{realm}/users/{id}/role-mappings/realm`
+  - Groups: `PUT /admin/realms/{realm}/users/{id}/groups/{groupId}`
+- **Password Reset:** `PUT /admin/realms/{realm}/users/{id}/reset-password`
+- **Email Verification:** `PUT /admin/realms/{realm}/users/{id}/send-verify-email`
 
 These operations can be performed via the Keycloak Admin Console or programmatically using the [Keycloak Admin REST API](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource).
 
@@ -226,29 +243,35 @@ These operations can be performed via the Keycloak Admin Console or programmatic
 
 ### 4.1 API Design
 
-This sequence diagram outlines the main API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair with the specific endpoint.
+This sequence diagram outlines the main Keycloak REST API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair with the actual Keycloak endpoint.
 
 [Keycloak REST API](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html) | [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html)
+
+**Key Endpoints:**
+- `/realms/{realm}/protocol/openid-connect/auth` — Authorization endpoint (user login)
+- `/realms/{realm}/protocol/openid-connect/token` — Token endpoint (get/refresh tokens)
+- `/realms/{realm}/protocol/openid-connect/userinfo` — User info endpoint
+- `/admin/realms/{realm}/users` — Admin user management endpoint
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant AuthAPI as /auth
-    participant TokenAPI as /token
-    participant UserInfoAPI as /userinfo
-    participant AdminAPI as /admin
+    participant AuthEndpoint as /realms/{realm}/protocol/openid-connect/auth
+    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
+    participant UserInfoEndpoint as /realms/{realm}/protocol/openid-connect/userinfo
+    participant AdminEndpoint as /admin/realms/{realm}/users
 
-    Client->>AuthAPI: POST /auth (credentials)
-    AuthAPI-->>Client: Auth response (token or error)
+    Client->>AuthEndpoint: GET /realms/{realm}/protocol/openid-connect/auth (login)
+    AuthEndpoint-->>Client: Auth code / login page
 
-    Client->>TokenAPI: POST /token (refresh/exchange)
-    TokenAPI-->>Client: Token response
+    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (exchange code/refresh token)
+    TokenEndpoint-->>Client: Access/Refresh token
 
-    Client->>UserInfoAPI: GET /userinfo (with token)
-    UserInfoAPI-->>Client: User info
+    Client->>UserInfoEndpoint: GET /realms/{realm}/protocol/openid-connect/userinfo (with token)
+    UserInfoEndpoint-->>Client: User info
 
-    Client->>AdminAPI: Admin operations (with token)
-    AdminAPI-->>Client: Admin response
+    Client->>AdminEndpoint: Admin operations (with admin token)
+    AdminEndpoint-->>Client: Admin response
 ```
 
 ### 4.2 Protocol Support
@@ -284,6 +307,21 @@ classDiagram
     }
 ```
 
+**Token Management Endpoints:**
+- **Token Introspection:** `POST /realms/{realm}/protocol/openid-connect/token/introspect`
+- **Token Revocation:** `POST /realms/{realm}/protocol/openid-connect/revoke`
+- **Logout:** `POST /realms/{realm}/protocol/openid-connect/logout`
+
+**Example Token Introspection Flow:**
+```mermaid
+sequenceDiagram
+    participant ResourceServer
+    participant IntrospectEndpoint as /realms/{realm}/protocol/openid-connect/token/introspect
+
+    ResourceServer->>IntrospectEndpoint: POST (token)
+    IntrospectEndpoint-->>ResourceServer: Token status (active/inactive, claims)
+```
+
 ### 5.2 Security Features
 
 - Password Policies
@@ -300,11 +338,16 @@ This flowchart demonstrates the backup strategy, including daily backups of the 
 
 [Keycloak Backup and Restore](https://www.keycloak.org/docs/latest/server_admin/#_backup_restore) | [Database Backup Best Practices](https://www.postgresql.org/docs/current/backup.html)
 
+**Key Backup/Restore Endpoints and Commands:**
+- **Export Realm (REST):** `POST /admin/realms/{realm}/partial-export`
+- **Import Realm (REST):** `POST /admin/realms/{realm}/partial-import`
+- **Export/Import (CLI):** `bin/kc.sh export` and `bin/kc.sh import`
+
 ```mermaid
 graph TD
     A[Daily Backup] --> B[Database Backup]
     A --> C[Configuration Backup]
-    A --> D[Realm Export]
+    A --> D[Realm Export: /admin/realms/{realm}/partial-export]
     B --> E[Backup Storage]
     C --> E
     D --> E
@@ -314,7 +357,7 @@ graph TD
 
 - Database Restoration
 - Configuration Restoration
-- Realm Import
+- Realm Import (`/admin/realms/{realm}/partial-import` or `kc.sh import`)
 - Service Recovery
 
 ## 7. Performance Design
