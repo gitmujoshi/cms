@@ -113,6 +113,46 @@ classDiagram
     }
 ```
 
+### 3.3 User Registration and Management
+
+This section describes how users are registered and managed in Keycloak.
+
+#### 3.3.1 User Registration Flow
+
+This sequence diagram illustrates the process of registering a new user in the system. The client submits registration details to the Keycloak registration endpoint. Keycloak validates the input, creates the user in its database, and may trigger additional actions such as sending a verification email.
+
+[Keycloak User Registration](https://www.keycloak.org/docs/latest/server_admin/#user-registration) | [Keycloak REST API: Create User](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Keycloak
+    participant DB
+
+    Client->>Keycloak: POST /register (user details)
+    Keycloak->>DB: Create User
+    DB-->>Keycloak: User Created
+    Keycloak-->>Client: Registration Success / Verification Email
+```
+
+#### 3.3.2 User Management Operations
+
+Keycloak provides a comprehensive set of user management features, including:
+
+- **Create User:** Admins or self-service registration can create new users.
+- **Update User:** Modify user attributes, roles, groups, or credentials.
+- **Delete User:** Remove users from the system.
+- **Enable/Disable User:** Temporarily deactivate or reactivate user accounts.
+- **Assign Roles/Groups:** Manage user permissions and group memberships.
+- **Password Reset:** Initiate password reset flows for users.
+- **Email Verification:** Send and manage email verification for new users.
+
+These operations can be performed via the Keycloak Admin Console or programmatically using the [Keycloak Admin REST API](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource).
+
+**References:**
+- [Keycloak User Management](https://www.keycloak.org/docs/latest/server_admin/#user-management)
+- [Keycloak Admin REST API: Users](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource)
+
 ## 4. Integration Design
 
 ### 4.1 API Design
