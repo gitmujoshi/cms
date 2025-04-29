@@ -96,9 +96,9 @@ classDiagram
 
 ### 3.2 User Model
 
-This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, and custom attributes. This model supports flexible user management and attribute storage.
+This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, custom attributes, and support for Decentralized Identifiers (DIDs). The addition of DID-related fields allows the system to integrate with decentralized identity frameworks, enabling users to be identified and verified using standards-based, self-sovereign identities.
 
-[Keycloak User Storage](https://www.keycloak.org/docs/latest/server_development/#_user-storage-spi) | [User Federation](https://www.keycloak.org/docs/latest/server_admin/#user-federation)
+[Keycloak User Storage](https://www.keycloak.org/docs/latest/server_development/#_user-storage-spi) | [User Federation](https://www.keycloak.org/docs/latest/server_admin/#user-federation) | [Decentralized Identifiers (DIDs) W3C Spec](https://www.w3.org/TR/did-core/)
 
 ```mermaid
 classDiagram
@@ -110,8 +110,20 @@ classDiagram
         +List~Role~ roles
         +List~Group~ groups
         +Map~String, String~ attributes
+        +String did                    // Decentralized Identifier
+        +List~String~ didMethods       // Supported DID methods (e.g., "key", "web", "ion")
+        +Map~String, String~ didDocs   // DID Documents or references
+        +Boolean didVerified           // DID verification status
     }
 ```
+
+**DID-related attributes:**
+- **did:** The user's Decentralized Identifier (DID), e.g., `did:ion:xyz...`
+- **didMethods:** List of DID methods supported or used by the user (e.g., `key`, `web`, `ion`).
+- **didDocs:** Map containing DID Documents or references to their storage locations.
+- **didVerified:** Boolean indicating whether the user's DID has been verified.
+
+These attributes enable the IAM system to support decentralized identity use cases, such as self-sovereign identity, verifiable credentials, and interoperability with blockchain-based identity systems.
 
 ### 3.3 User Registration and Management
 
