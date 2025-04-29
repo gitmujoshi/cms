@@ -95,12 +95,34 @@ classDiagram
 
 ### 4.1 API Design
 ```mermaid
-graph LR
-    A[Client] --> B[/auth]
-    A --> C[/token]
-    A --> D[/userinfo]
-    A --> E[/admin]
+sequenceDiagram
+    participant Client
+    participant API
+
+    Client->>API: POST /auth (credentials)
+    API-->>Client: Auth response (token or error)
+
+    Client->>API: POST /token (refresh or exchange)
+    API-->>Client: Token response
+
+    Client->>API: GET /userinfo (with token)
+    API-->>Client: User info
+
+    Client->>API: Admin endpoints (/admin)
+    API-->>Client: Admin response
 ```
+
+**You can adjust the endpoints and flow as needed for your actual API logic.**
+
+---
+
+### Summary
+
+- If you want to show the order and interaction, use `sequenceDiagram` (like 2.1).
+- If you just want to show relationships, use `graph`.
+- For consistency and clarity, using `sequenceDiagram` for 4.1 is a good idea.
+
+Let me know if you want to further customize the sequence or need help with another section!
 
 ### 4.2 Protocol Support
 - OAuth 2.0
