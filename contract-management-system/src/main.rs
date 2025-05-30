@@ -1,3 +1,29 @@
+//! Contract Management System - Main Application Entry Point
+//! 
+//! This file serves as the main entry point for the Contract Management System.
+//! It handles:
+//! - Application initialization and configuration
+//! - Environment variable loading
+//! - Logging setup
+//! - Database connection initialization
+//! - HTTP server configuration and startup
+//! - Middleware setup (authentication, logging, compression)
+//! - API route registration
+//!
+//! The application is built using:
+//! - actix-web for the web framework
+//! - sea-orm for database operations
+//! - tracing for structured logging
+//! - dotenv for environment configuration
+//!
+//! Usage:
+//! 1. Set required environment variables (DATABASE_URL, JWT_SECRET)
+//! 2. Run the application: cargo run
+//! 3. The server will start on the configured host and port
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;
@@ -13,12 +39,20 @@ mod utils;
 
 use utils::{db::init_db_pool, init_metrics};
 
+/// Main entry point for the Contract Management System
+/// 
+/// This function:
+/// 1. Initializes the application environment and logging
+/// 2. Sets up database connection and metrics
+/// 3. Configures the HTTP server with middleware and routes
+/// 4. Starts the server on the configured host and port
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // Load environment variables
+    // Load environment variables from .env file
     dotenv().ok();
 
-    // Initialize logging
+    // Configure and initialize the logging system
+    // This sets up structured logging with thread IDs, file names, and line numbers
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .with_target(false)
@@ -31,39 +65,41 @@ async fn main() -> std::io::Result<()> {
 
     info!("Starting Contract Management System...");
 
-    // Get configuration from environment
+    // Load configuration from environment variables with fallback values
     let host = env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
-    // Initialize database connection
+    // Initialize the database connection pool
+    // This creates a pool of database connections for efficient query handling
     init_db_pool(&database_url)
         .await
         .expect("Failed to initialize database pool");
 
-    // Initialize metrics
+    // Initialize Prometheus metrics for monitoring
     init_metrics();
 
-    // Initialize authentication middleware
+    // Create authentication middleware instance with JWT secret
+    // This will be used to validate JWT tokens for protected routes
     let auth = auth::AuthMiddleware::new(jwt_secret.as_bytes());
 
-    // Start HTTP server
+    // Configure and start the HTTP server
     let server = HttpServer::new(move || {
         App::new()
-            // Add middleware
+            // Add standard middleware for logging, compression, and path normalization
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::default())
             .wrap(middleware::NormalizePath::new(
                 middleware::TrailingSlash::Trim,
             ))
-            // Add state
+            // Add authentication middleware to the application state
             .app_data(web::Data::new(auth.clone()))
-            // Add routes
+            // Configure API routes under /api/v1 prefix
             .service(
                 web::scope("/api/v1")
                     .configure(api::contracts_config)
-                    // Add more API configurations here
+                    // Additional API configurations can be added here
             )
     })
     .bind(format!("{}:{}", host, port))?
@@ -71,5 +107,6 @@ async fn main() -> std::io::Result<()> {
 
     info!("Server running at http://{}:{}", host, port);
 
+    // Start the server and wait for it to complete
     server.await
 }

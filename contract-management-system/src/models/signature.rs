@@ -1,3 +1,44 @@
+//! Contract Management System - Signature Model
+//! 
+//! This module defines the digital signature data model for the Contract Management System.
+//! It provides the database schema and data structures for:
+//! - Digital signatures
+//! - Signature verification
+//! - Signature metadata
+//! - Signature history
+//! - Signature relationships
+//!
+//! Features:
+//! - Signature schema definition
+//! - Verification status
+//! - Metadata management
+//! - History tracking
+//! - Relationship management
+//!
+//! Data Structures:
+//! - Signature entity
+//! - Verification data
+//! - Signature metadata
+//! - Signature history
+//! - Signature relationships
+//!
+//! Security Features:
+//! - Digital signature verification
+//! - Timestamp validation
+//! - Chain of custody
+//! - Audit trail
+//! - Integrity checks
+//!
+//! Usage:
+//! 1. Define signature structure
+//! 2. Manage verification
+//! 3. Track history
+//! 4. Handle metadata
+//! 5. Maintain relationships
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

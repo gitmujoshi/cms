@@ -32,7 +32,7 @@ The system is deployed using the following AWS services:
    export AWS_ACCESS_KEY_ID="your_access_key"
    export AWS_SECRET_ACCESS_KEY="your_secret_key"
    export AWS_REGION="us-west-2"
-   ```
+   ```aws 
 
 ## Directory Structure
 

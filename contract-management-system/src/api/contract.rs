@@ -1,3 +1,44 @@
+//! Contract Management System - Contract API Module
+//! 
+//! This module defines the contract-related REST API endpoints for the Contract Management System.
+//! It provides the HTTP interface for:
+//! - Contract creation
+//! - Contract management
+//! - Contract state transitions
+//! - Contract queries
+//! - Contract operations
+//!
+//! Features:
+//! - Contract CRUD operations
+//! - State management
+//! - Search and filtering
+//! - Bulk operations
+//! - Event handling
+//!
+//! Endpoints:
+//! - Contract creation
+//! - Contract updates
+//! - Contract queries
+//! - State transitions
+//! - Contract operations
+//!
+//! Security Features:
+//! - Authentication
+//! - Authorization
+//! - Input validation
+//! - Rate limiting
+//! - Audit logging
+//!
+//! Usage:
+//! 1. Configure contract routes
+//! 2. Handle contract requests
+//! 3. Process responses
+//! 4. Manage errors
+//! 5. Document endpoints
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{web, HttpResponse, Scope};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

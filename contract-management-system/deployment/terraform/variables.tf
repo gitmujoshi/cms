@@ -16,7 +16,7 @@ variable "project_name" {
 variable "aws_region" {
   description = "AWS region where resources will be deployed"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-2"
   # Choose a region close to your users for better performance
   # Available regions: https://docs.aws.amazon.com/general/latest/gr/rande.html
 }

@@ -1,70 +1,10 @@
 # Identity and Access Management (IAM) System Design Document
 
-## 1. Authentication Design
+---
 
-### 1.1 Authentication Flow
+## 1. Data Model Design
 
-This sequence diagram illustrates the authentication process using Keycloak as the identity provider, showing the actual endpoints involved. The client initiates authentication via the OpenID Connect authorization endpoint, receives an authorization code, and exchanges it for tokens at the token endpoint.
-
-[Keycloak Authentication Flows](https://www.keycloak.org/docs/latest/server_admin/#authentication-flows) | [JWT Introduction](https://jwt.io/introduction/)
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant AuthEndpoint as /realms/{realm}/protocol/openid-connect/auth
-    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
-    participant DB
-    
-    Client->>AuthEndpoint: GET /realms/{realm}/protocol/openid-connect/auth (login)
-    AuthEndpoint->>DB: Validate Credentials
-    DB-->>AuthEndpoint: Credential Status
-    AuthEndpoint-->>Client: Auth code / login page
-
-    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (exchange code)
-    TokenEndpoint-->>Client: JWT Token
-```
-
-### 1.2 Authentication Methods
-
-- Username/Password
-- OAuth 2.0
-- OpenID Connect
-- Social Login (configurable)
-- LDAP (configurable)
-
-## 2. Authorization Design
-
-### 2.1 Authorization Flow
-
-This sequence diagram shows how authorization is handled using actual Keycloak endpoints. The client requests an access token from the token endpoint, uses it to access a protected resource, and the resource server validates the token (optionally using the userinfo endpoint).
-
-[OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) | [Keycloak Authorization Services](https://www.keycloak.org/docs/latest/authorization_services/)
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
-    participant ResourceAPI as /resource
-    participant UserInfoEndpoint as /realms/{realm}/protocol/openid-connect/userinfo
-
-    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (get access token)
-    TokenEndpoint-->>Client: Access Token
-    Client->>ResourceAPI: GET /resource (with access token)
-    ResourceAPI->>UserInfoEndpoint: GET /realms/{realm}/protocol/openid-connect/userinfo (validate token)
-    UserInfoEndpoint-->>ResourceAPI: User info / token status
-    ResourceAPI-->>Client: Resource Access
-```
-
-### 2.2 Authorization Models
-
-- Role-Based Access Control (RBAC)
-- Group-Based Permissions
-- Fine-Grained Access Control
-- Token-Based Authorization
-
-## 3. Data Model Design
-
-### 3.1 Realm Structure
+### 1.1 Realm Structure
 
 This class diagram represents the structure of a Keycloak realm, which is a logical grouping of users, roles, clients, and groups. Realms allow for multi-tenancy and isolation of authentication and authorization data.
 
@@ -99,7 +39,7 @@ classDiagram
     }
 ```
 
-### 3.2 User Model
+### 1.2 User Model
 
 This class diagram details the user model, including attributes such as ID, username, email, enabled status, roles, groups, custom attributes, and support for Decentralized Identifiers (DIDs) and public keys. The addition of DID-related fields and public key storage allows the system to integrate with decentralized identity frameworks, passwordless authentication, and cryptographic login flows.
 
@@ -131,8 +71,6 @@ classDiagram
 - **publicKey:** The user's public key, used for cryptographic authentication (e.g., DID login, passwordless, WebAuthn).
 
 These attributes enable the IAM system to support decentralized identity use cases, passwordless authentication, verifiable credentials, and interoperability with blockchain-based identity systems.
-
----
 
 #### 1.2.1 Storing and Retrieving a User's Public Key in Keycloak
 
@@ -222,8 +160,6 @@ sequenceDiagram
 
 ### 1.4 User Registration and Management
 
-This section describes how users are registered and managed in Keycloak, using actual endpoints for both self-service and admin-driven registration.
-
 #### 1.4.1 User Registration Flow
 
 This sequence diagram illustrates the process of registering a new user in the system, showing both self-service registration (if enabled) and admin-driven registration.
@@ -271,8 +207,6 @@ These operations can be performed via the Keycloak Admin Console or programmatic
 **References:**
 - [Keycloak User Management](https://www.keycloak.org/docs/latest/server_admin/#user-management)
 - [Keycloak Admin REST API: Users](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html#_users_resource)
-
----
 
 #### 1.4.3 Sample Script: Registration and Authentication with Public Key
 
@@ -340,9 +274,41 @@ def verify_signature(public_key_pem, challenge, signature_b64):
 
 ---
 
-## 2. Authorization Design
+## 2. Authentication Design
 
-### 2.1 Authorization Flow
+### 2.1 Authentication Flow
+
+This sequence diagram illustrates the authentication process using Keycloak as the identity provider, showing the actual endpoints involved. The client initiates authentication via the OpenID Connect authorization endpoint, receives an authorization code, and exchanges it for tokens at the token endpoint.
+
+[Keycloak Authentication Flows](https://www.keycloak.org/docs/latest/server_admin/#authentication-flows) | [JWT Introduction](https://jwt.io/introduction/)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AuthEndpoint as /realms/{realm}/protocol/openid-connect/auth
+    participant TokenEndpoint as /realms/{realm}/protocol/openid-connect/token
+    participant DB
+    
+    Client->>AuthEndpoint: GET /realms/{realm}/protocol/openid-connect/auth (login)
+    AuthEndpoint->>DB: Validate Credentials
+    DB-->>AuthEndpoint: Credential Status
+    AuthEndpoint-->>Client: Auth code / login page
+
+    Client->>TokenEndpoint: POST /realms/{realm}/protocol/openid-connect/token (exchange code)
+    TokenEndpoint-->>Client: JWT Token
+```
+
+### 2.2 Authentication Methods
+
+- Username/Password
+- OAuth 2.0
+- OpenID Connect
+- Social Login (configurable)
+- LDAP (configurable)
+
+## 3. Authorization Design
+
+### 3.1 Authorization Flow
 
 This sequence diagram shows how authorization is handled using actual Keycloak endpoints. The client requests an access token from the token endpoint, uses it to access a protected resource, and the resource server validates the token (optionally using the userinfo endpoint).
 
@@ -363,16 +329,16 @@ sequenceDiagram
     ResourceAPI-->>Client: Resource Access
 ```
 
-### 2.2 Authorization Models
+### 3.2 Authorization Models
 
 - Role-Based Access Control (RBAC)
 - Group-Based Permissions
 - Fine-Grained Access Control
 - Token-Based Authorization
 
-## 3. Integration Design
+## 4. Integration Design
 
-### 3.1 API Design
+### 4.1 API Design
 
 This sequence diagram outlines the main Keycloak REST API endpoints and their interactions with the client. The client authenticates, refreshes tokens, retrieves user info, and accesses admin endpoints. Each interaction is shown as a request-response pair with the actual Keycloak endpoint.
 
@@ -405,16 +371,16 @@ sequenceDiagram
     AdminEndpoint-->>Client: Admin response
 ```
 
-### 3.2 Protocol Support
+### 4.2 Protocol Support
 
 - OAuth 2.0
 - OpenID Connect
 - SAML 2.0
 - LDAP
 
-## 4. Security Design
+## 5. Security Design
 
-### 4.1 Token Design
+### 5.1 Token Design
 
 This class diagram shows the structure of tokens used in the system. JWT tokens consist of a header, payload, and signature, and provide methods for validation and claim retrieval. The Token class represents access and refresh tokens, their expiry, and type.
 
@@ -453,7 +419,7 @@ sequenceDiagram
     IntrospectEndpoint-->>ResourceServer: Token status (active/inactive, claims)
 ```
 
-### 4.2 Security Features
+### 5.2 Security Features
 
 - Password Policies
 - Brute Force Protection
@@ -461,9 +427,9 @@ sequenceDiagram
 - Audit Logging
 - Token Validation
 
-## 5. Backup and Recovery Design
+## 6. Backup and Recovery Design
 
-### 5.1 Backup Strategy
+### 6.1 Backup Strategy
 
 This flowchart demonstrates the backup strategy, including daily backups of the database, configuration, and realm exports, all stored in a backup storage location. This ensures disaster recovery and data integrity.
 
@@ -478,22 +444,22 @@ This flowchart demonstrates the backup strategy, including daily backups of the 
 graph TD
     A[Daily Backup] --> B[Database Backup]
     A --> C[Configuration Backup]
-    A --> D[Realm Export: /admin/realms/{realm}/partial-export]
+    A --> D["Realm Export<br/>/admin/realms/{realm}/partial-export"]
     B --> E[Backup Storage]
     C --> E
     D --> E
 ```
 
-### 5.2 Recovery Procedures
+### 6.2 Recovery Procedures
 
 - Database Restoration
 - Configuration Restoration
 - Realm Import (`/admin/realms/{realm}/partial-import` or `kc.sh import`)
 - Service Recovery
 
-## 6. Performance Design
+## 7. Performance Design
 
-### 6.1 Caching Design
+### 7.1 Caching Design
 
 This flowchart shows the caching strategy, where different types of caches (token, session, permission, realm) are stored in Redis. This improves performance and scalability by reducing database load.
 
@@ -507,16 +473,16 @@ graph TD
     E[Realm Cache] --> B
 ```
 
-### 6.2 Scaling Design
+### 7.2 Scaling Design
 
 - Horizontal Scaling
 - Load Balancing
 - Database Sharding
 - Cache Distribution
 
-## 7. Future Design Considerations
+## 8. Future Design Considerations
 
-### 7.1 Planned Features
+### 8.1 Planned Features
 
 - Multi-Factor Authentication
 - Social Login Integration
@@ -524,7 +490,7 @@ graph TD
 - Advanced Authorization Policies
 - Audit Logging Enhancements
 
-### 7.2 Design Improvements
+### 8.2 Design Improvements
 
 - Microservices Architecture
 - Event-Driven Design

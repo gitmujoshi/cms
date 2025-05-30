@@ -1,3 +1,44 @@
+//! Contract Management System - Audit Service
+//! 
+//! This module implements the audit logging service for the Contract Management System.
+//! It provides comprehensive audit trail functionality including:
+//! - Action logging
+//! - Event tracking
+//! - Change history
+//! - Compliance reporting
+//! - Security monitoring
+//!
+//! Features:
+//! - Comprehensive event logging
+//! - Change tracking
+//! - Compliance reporting
+//! - Security monitoring
+//! - Audit trail management
+//!
+//! Security Features:
+//! - Immutable logging
+//! - Tamper detection
+//! - Access control
+//! - Data integrity
+//! - Privacy protection
+//!
+//! Integration Points:
+//! - All system services
+//! - Compliance systems
+//! - Monitoring systems
+//! - Reporting systems
+//! - Security systems
+//!
+//! Usage:
+//! 1. Initialize the audit service
+//! 2. Log system events
+//! 3. Track changes
+//! 4. Generate reports
+//! 5. Monitor security
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde_json::Value;
 use uuid::Uuid;

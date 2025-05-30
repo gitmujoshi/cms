@@ -1,0 +1,233 @@
+# Python virtual environments
+venv/
+env/
+ENV/
+.env
+.venv
+**/venv/
+**/env/
+**/.env
+**/.venv
+**/ENV/
+mnist-training/venv/
+mnist-training/.env
+deployment/venv/
+deployment/.env
+backend/venv/
+backend/.env
+frontend/venv/
+frontend/.env
+api/venv/
+api/.env
+tests/venv/
+tests/.env
+scripts/venv/
+scripts/.env
+modules/venv/
+modules/.env
+services/venv/
+services/.env
+utils/venv/
+utils/.env
+lib/venv/
+lib/.env
+src/venv/
+src/.env
+app/venv/
+app/.env
+web/venv/
+web/.env
+server/venv/
+server/.env
+client/venv/
+client/.env
+common/venv/
+common/.env
+shared/venv/
+shared/.env
+core/venv/
+core/.env
+config/venv/
+config/.env
+docs/venv/
+docs/.env
+examples/venv/
+examples/.env
+tools/venv/
+tools/.env
+bin/venv/
+bin/.env
+include/venv/
+include/.env
+lib64/venv/
+lib64/.env
+local/venv/
+local/.env
+share/venv/
+share/.env
+var/venv/
+var/.env
+tmp/venv/
+tmp/.env
+temp/venv/
+temp/.env
+build/venv/
+build/.env
+dist/venv/
+dist/.env
+eggs/venv/
+eggs/.env
+parts/venv/
+parts/.env
+sdist/venv/
+sdist/.env
+wheels/venv/
+wheels/.env
+develop-eggs/venv/
+develop-eggs/.env
+.installed.cfg
+*.egg
+*.egg-info/
+.eggs/
+.python-version
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# AWS credentials and configuration
+.aws/
+aws.json
+credentials.json
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraformrc
+terraform.rc
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+log/
+
+# Local development
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Model checkpoints and data
+*.h5
+*.ckpt
+*.pth
+*.pt
+*.pkl
+*.npy
+*.npz
+data/
+models/
+checkpoints/
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux system files
+*~
+
+# Editor swap/backup files
+*.bak
+*.tmp
+*.swp
+*.swo
+*.swn
+*.orig
+
+# Test output
+test-output/
+*.out
+
+# Coverage and profiling
+.coverage
+.cache/
+*.prof
+
+# Node.js (if any JS/TS is used)
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Python pipenv/poetry
+Pipfile.lock
+poetry.lock
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Secret files
+secrets.*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Database files
+*.sqlite3
+*.db
+*.db-journal
+
+# Build artifacts
+*.o
+*.so
+*.a
+*.dll
+*.exe
+*.out
+
+# Misc
+*.log
+*.pid
+*.pid.lock 

@@ -1,3 +1,44 @@
+//! Contract Management System - Contracts API Module
+//! 
+//! This module defines the bulk contract operations REST API endpoints for the Contract Management System.
+//! It provides the HTTP interface for:
+//! - Bulk contract operations
+//! - Contract batch processing
+//! - Contract search and filtering
+//! - Contract analytics
+//! - Contract reporting
+//!
+//! Features:
+//! - Bulk operations
+//! - Advanced search
+//! - Filtering and sorting
+//! - Analytics endpoints
+//! - Reporting endpoints
+//!
+//! Endpoints:
+//! - Bulk operations
+//! - Search endpoints
+//! - Analytics endpoints
+//! - Reporting endpoints
+//! - Batch processing
+//!
+//! Security Features:
+//! - Authentication
+//! - Authorization
+//! - Input validation
+//! - Rate limiting
+//! - Audit logging
+//!
+//! Usage:
+//! 1. Configure bulk operation routes
+//! 2. Handle batch requests
+//! 3. Process search queries
+//! 4. Generate reports
+//! 5. Document endpoints
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

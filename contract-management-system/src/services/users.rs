@@ -1,3 +1,44 @@
+//! Contract Management System - Users Service
+//! 
+//! This module implements the user management service for the Contract Management System.
+//! It provides comprehensive user management functionality including:
+//! - User profile management
+//! - Role management
+//! - Permission control
+//! - User authentication
+//! - User session management
+//!
+//! Features:
+//! - User CRUD operations
+//! - Role-based access control
+//! - Permission management
+//! - Session handling
+//! - Profile management
+//!
+//! Security Features:
+//! - Password management
+//! - Session security
+//! - Access control
+//! - Audit logging
+//! - Data privacy
+//!
+//! Integration Points:
+//! - Authentication system
+//! - Role management
+//! - Organization management
+//! - Audit system
+//! - Notification system
+//!
+//! Usage:
+//! 1. Initialize the users service
+//! 2. Manage user profiles
+//! 3. Handle user roles and permissions
+//! 4. Process user sessions
+//! 5. Manage user authentication
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, Set, QueryOrder};
 use uuid::Uuid;
 use serde_json::json;

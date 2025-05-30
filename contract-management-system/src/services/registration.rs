@@ -1,3 +1,35 @@
+//! Contract Management System - Registration Service
+//! 
+//! This module implements the user and organization registration service for the Contract Management System.
+//! It handles the complete registration workflow including:
+//! - User registration and validation
+//! - Organization registration
+//! - Public key management
+//! - Initial role assignment
+//!
+//! Features:
+//! - Multi-step registration process
+//! - Email verification
+//! - Public key validation
+//! - Organization hierarchy management
+//! - Role-based access control setup
+//!
+//! Security Features:
+//! - Secure password hashing
+//! - Public key verification
+//! - Email domain validation
+//! - Rate limiting
+//! - Input validation
+//!
+//! Usage:
+//! 1. Initialize the registration service
+//! 2. Handle user registration requests
+//! 3. Process organization registration
+//! 4. Manage public key registration
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use std::sync::Arc;
 use sea_orm::*;
 use uuid::Uuid;
