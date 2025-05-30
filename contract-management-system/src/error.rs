@@ -1,3 +1,36 @@
+//! Contract Management System - Error Handling Module
+//! 
+//! This module provides comprehensive error handling for the Contract Management System.
+//! It defines two main error types:
+//! - AppError: Application-level errors for internal use
+//! - ApiError: HTTP API-specific errors for client responses
+//!
+//! Features:
+//! - Structured error types for different error scenarios
+//! - Automatic conversion between error types
+//! - Standardized error response format
+//! - Integration with actix-web's error handling system
+//! - Support for blockchain and contract-specific errors
+//!
+//! Error Categories:
+//! - Database errors
+//! - Authentication errors
+//! - Validation errors
+//! - Resource not found errors
+//! - Blockchain interaction errors
+//! - Contract state errors
+//! - Signature verification errors
+//! - Internal server errors
+//!
+//! Usage:
+//! 1. Use AppError for internal error handling
+//! 2. Use ApiError for HTTP API responses
+//! 3. Convert between error types using From implementations
+//! 4. Return errors using the Result type alias
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{HttpResponse, ResponseError};
 use sea_orm::DbErr;
 use serde::Serialize;

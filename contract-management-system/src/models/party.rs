@@ -1,3 +1,44 @@
+//! Contract Management System - Party Model
+//! 
+//! This module defines the contract party data model for the Contract Management System.
+//! It provides the database schema and data structures for:
+//! - Contract parties
+//! - Party roles
+//! - Party relationships
+//! - Party metadata
+//! - Party history
+//!
+//! Features:
+//! - Party schema definition
+//! - Role management
+//! - Relationship tracking
+//! - Metadata handling
+//! - History management
+//!
+//! Data Structures:
+//! - Party entity
+//! - Role definitions
+//! - Party metadata
+//! - Party relationships
+//! - Party history
+//!
+//! Relationships:
+//! - Contracts
+//! - Organizations
+//! - Users
+//! - Signatures
+//! - Audit logs
+//!
+//! Usage:
+//! 1. Define party structure
+//! 2. Manage roles
+//! 3. Track relationships
+//! 4. Handle metadata
+//! 5. Maintain history
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

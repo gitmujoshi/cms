@@ -1,3 +1,44 @@
+//! Contract Management System - Contract Service
+//! 
+//! This module implements the core contract management service for the Contract Management System.
+//! It provides comprehensive contract lifecycle management including:
+//! - Contract creation and validation
+//! - Contract state management
+//! - Digital signature processing
+//! - Contract versioning
+//! - Contract execution and enforcement
+//!
+//! Features:
+//! - Smart contract integration
+//! - Multi-party signature workflow
+//! - Contract template management
+//! - Contract state transitions
+//! - Contract event handling
+//!
+//! Security Features:
+//! - Digital signature verification
+//! - Contract state validation
+//! - Access control enforcement
+//! - Audit logging
+//! - Version control
+//!
+//! Integration Points:
+//! - Blockchain network
+//! - Document storage
+//! - Notification system
+//! - Audit system
+//! - User management
+//!
+//! Usage:
+//! 1. Initialize the contract service
+//! 2. Create and manage contracts
+//! 3. Handle contract state transitions
+//! 4. Process digital signatures
+//! 5. Monitor contract execution
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use sea_orm::*;

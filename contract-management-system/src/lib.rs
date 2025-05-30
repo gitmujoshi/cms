@@ -1,3 +1,29 @@
+//! Contract Management System - Core Library
+//! 
+//! This file defines the core library structure and module organization for the Contract Management System.
+//! It serves as the central module registry and documentation hub for the entire system.
+//!
+//! The library is organized into several key modules:
+//! - api: REST API endpoints and handlers
+//! - models: Data models and database schemas
+//! - services: Business logic implementation
+//! - utils: Utility functions and helpers
+//!
+//! Specialized modules include:
+//! - contracts: Contract management and processing
+//! - enclave: Secure computation using AWS Nitro Enclaves
+//! - access: Dataset access control
+//! - audit: Audit logging and compliance
+//! - training: Model training orchestration
+//! - security: Core security features
+//!
+//! Usage:
+//! This library is used as the foundation for the Contract Management System.
+//! It provides all the core functionality needed by the main application.
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 pub mod api;
 pub mod models;
 pub mod services;

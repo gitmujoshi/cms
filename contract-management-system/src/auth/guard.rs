@@ -1,3 +1,41 @@
+//! Contract Management System - Authentication Guard Module
+//! 
+//! This module implements the authentication guard system for the Contract Management System.
+//! It provides a middleware-based approach to protect routes and validate user authentication.
+//!
+//! Components:
+//! - AuthGuard: Structure holding authenticated user information
+//! - AuthMiddleware: Factory for creating authentication middleware
+//! - AuthMiddlewareService: Service implementing the authentication logic
+//!
+//! Features:
+//! - Request-level authentication
+//! - JWT token validation
+//! - User information extraction
+//! - Role-based access control
+//! - Integration with actix-web's middleware system
+//!
+//! Implementation Details:
+//! - Uses actix-web's Transform and Service traits
+//! - Implements async request processing
+//! - Provides type-safe authentication guards
+//! - Handles token extraction and validation
+//!
+//! Usage:
+//! 1. Create an AuthMiddleware instance
+//! 2. Apply the middleware to protected routes
+//! 3. Access authenticated user information in handlers
+//! 4. Use role information for authorization
+//!
+//! Security Notes:
+//! - Validates Bearer token format
+//! - Verifies JWT signatures
+//! - Checks token expiration
+//! - Provides secure user information access
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpMessage,

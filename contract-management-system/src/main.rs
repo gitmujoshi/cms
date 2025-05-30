@@ -1,3 +1,29 @@
+//! Contract Management System - Main Application Entry Point
+//! 
+//! This file serves as the main entry point for the Contract Management System.
+//! It handles:
+//! - Application initialization and configuration
+//! - Environment variable loading
+//! - Logging setup
+//! - Database connection initialization
+//! - HTTP server configuration and startup
+//! - Middleware setup (authentication, logging, compression)
+//! - API route registration
+//!
+//! The application is built using:
+//! - actix-web for the web framework
+//! - sea-orm for database operations
+//! - tracing for structured logging
+//! - dotenv for environment configuration
+//!
+//! Usage:
+//! 1. Set required environment variables (DATABASE_URL, JWT_SECRET)
+//! 2. Run the application: cargo run
+//! 3. The server will start on the configured host and port
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;

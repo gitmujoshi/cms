@@ -1,3 +1,44 @@
+//! Contract Management System - Organizations Service
+//! 
+//! This module implements the organization management service for the Contract Management System.
+//! It provides comprehensive organization management functionality including:
+//! - Organization CRUD operations
+//! - Organization hierarchy management
+! - Department management
+//! - User-organization relationships
+//! - Organization settings
+//!
+//! Features:
+//! - Organization structure management
+//! - Department organization
+//! - User assignment
+//! - Role management
+//! - Settings configuration
+//!
+//! Security Features:
+//! - Access control
+//! - Data isolation
+//! - Audit logging
+//! - Role enforcement
+//! - Privacy controls
+//!
+//! Integration Points:
+//! - User management
+//! - Role management
+//! - Contract management
+//! - Audit system
+//! - Notification system
+//!
+//! Usage:
+//! 1. Initialize the organizations service
+//! 2. Create and manage organizations
+//! 3. Handle organization structure
+//! 4. Manage user assignments
+//! 5. Configure organization settings
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, Set, QueryOrder};
 use uuid::Uuid;
 use serde_json::json;

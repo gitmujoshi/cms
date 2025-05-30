@@ -1,3 +1,44 @@
+//! Contract Management System - Ledger Service
+//! 
+//! This module implements the distributed ledger service for the Contract Management System.
+//! It provides blockchain integration and transaction management including:
+//! - Transaction recording
+//! - Smart contract deployment
+//! - Event logging
+//! - State verification
+//! - Transaction history
+//!
+//! Features:
+//! - Blockchain network integration
+//! - Transaction management
+//! - Smart contract interaction
+//! - Event subscription
+//! - State synchronization
+//!
+//! Security Features:
+//! - Transaction signing
+//! - State verification
+//! - Consensus validation
+//! - Network security
+//! - Data integrity
+//!
+//! Integration Points:
+//! - Blockchain network
+//! - Smart contracts
+//! - Event system
+//! - State management
+//! - Audit system
+//!
+//! Usage:
+//! 1. Initialize the ledger service
+//! 2. Record transactions
+//! 3. Deploy smart contracts
+//! 4. Monitor events
+//! 5. Verify state
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use ethers::{
     prelude::*,
     providers::{Http, Provider},

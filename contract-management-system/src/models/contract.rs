@@ -1,3 +1,44 @@
+//! Contract Management System - Contract Model
+//! 
+//! This module defines the core contract data model for the Contract Management System.
+//! It provides the database schema and data structures for:
+//! - Contract definition
+//! - Contract state
+//! - Contract metadata
+//! - Contract relationships
+//! - Contract history
+//!
+//! Features:
+//! - Contract schema definition
+//! - State management
+//! - Version control
+//! - Relationship tracking
+//! - Metadata management
+//!
+//! Data Structures:
+//! - Contract entity
+//! - Contract state
+//! - Contract metadata
+//! - Contract relationships
+//! - Contract history
+//!
+//! Relationships:
+//! - Parties
+//! - Signatures
+//! - Organizations
+//! - Templates
+//! - Audit logs
+//!
+//! Usage:
+//! 1. Define contract structure
+//! 2. Manage contract state
+//! 3. Track relationships
+//! 4. Handle versioning
+//! 5. Store metadata
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

@@ -1,3 +1,38 @@
+//! Contract Management System - Authentication Module
+//! 
+//! This module provides JWT-based authentication for the Contract Management System.
+//! It implements a complete authentication system with:
+//! - JWT token generation and validation
+//! - User authentication middleware
+//! - Role-based access control
+//!
+//! Components:
+//! - Claims: JWT token payload structure
+//! - Auth: Core authentication service
+//! - AuthMiddleware: Request authentication middleware
+//!
+//! Features:
+//! - Secure token generation with expiration
+//! - Token validation and verification
+//! - User role management
+//! - Integration with actix-web middleware system
+//! - Extensible authentication guard system
+//!
+//! Security Considerations:
+//! - Tokens expire after 24 hours
+//! - Secure secret key management
+//! - Role-based access control
+//! - Bearer token authentication
+//!
+//! Usage:
+//! 1. Initialize Auth with a secret key
+//! 2. Generate tokens for authenticated users
+//! 3. Use AuthMiddleware to protect routes
+//! 4. Access user information in route handlers
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 // Import required dependencies
 use actix_web::dev::ServiceRequest;
 use actix_web::error::ErrorUnauthorized;

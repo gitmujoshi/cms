@@ -1,3 +1,44 @@
+//! Contract Management System - Repository Model
+//! 
+//! This module defines the data repository model for the Contract Management System.
+//! It provides the database access layer and data structures for:
+//! - Data persistence
+//! - Query operations
+//! - Transaction management
+//! - Data relationships
+//! - Data validation
+//!
+//! Features:
+//! - Repository pattern implementation
+//! - Query building
+//! - Transaction handling
+//! - Relationship management
+//! - Data validation
+//!
+//! Data Operations:
+//! - CRUD operations
+//! - Complex queries
+//! - Batch operations
+//! - Relationship queries
+//! - Data aggregation
+//!
+//! Integration Points:
+//! - Database connection
+//! - Entity models
+//! - Service layer
+//! - Transaction system
+//! - Cache system
+//!
+//! Usage:
+//! 1. Initialize repository
+//! 2. Perform data operations
+//! 3. Handle transactions
+//! 4. Manage relationships
+//! 5. Validate data
+//!
+//! Author: Contract Management System Team
+//! License: MIT
+
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
     QueryOrder, Set,
