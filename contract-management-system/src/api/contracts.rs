@@ -11,7 +11,11 @@
 //! Features:
 //! - Bulk operations
 //! - Advanced search
+<<<<<<< HEAD
 //! - Filtering and sorting
+=======
+! - Filtering and sorting
+>>>>>>> be40ae6810b5d3e03d4487e08e66c252a94a9d4c
 //! - Analytics endpoints
 //! - Reporting endpoints
 //!
