@@ -17,6 +17,43 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Function to check if Docker daemon is running
+check_docker_daemon() {
+    echo -e "${GREEN}Checking Docker daemon...${NC}"
+    if ! docker info >/dev/null 2>&1; then
+        echo -e "${YELLOW}Docker daemon is not running. Attempting to start Docker Desktop...${NC}"
+        
+        # Try to start Docker Desktop
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo -e "${GREEN}Starting Docker Desktop...${NC}"
+            open -a Docker
+            
+            # Wait for Docker to start (up to 60 seconds)
+            echo -e "${YELLOW}Waiting for Docker to start...${NC}"
+            for i in {1..60}; do
+                if docker info >/dev/null 2>&1; then
+                    echo -e "${GREEN}Docker Desktop started successfully!${NC}"
+                    return 0
+                fi
+                echo -n "."
+                sleep 1
+            done
+            
+            echo -e "\n${RED}Error: Docker Desktop failed to start within 60 seconds${NC}"
+            echo -e "${YELLOW}Please start Docker Desktop manually and try again.${NC}"
+            echo -e "${YELLOW}You can start Docker Desktop by:${NC}"
+            echo -e "${YELLOW}1. Opening Docker Desktop application${NC}"
+            echo -e "${YELLOW}2. Waiting for the Docker icon in the menu bar to show it's running${NC}"
+            echo -e "${YELLOW}3. Then run this script again${NC}"
+            exit 1
+        else
+            echo -e "${RED}Error: Docker daemon is not running${NC}"
+            echo -e "${YELLOW}Please start Docker Desktop and try again.${NC}"
+            exit 1
+        fi
+    fi
+}
+
 # Function to check if AWS CLI is working
 check_aws_cli() {
     echo -e "${GREEN}Checking AWS CLI...${NC}"
@@ -315,6 +352,9 @@ wait_and_download_logs() {
 
 # Main deployment process
 echo -e "${GREEN}Starting deployment process...${NC}"
+
+# Check Docker daemon first
+check_docker_daemon
 
 # Check AWS CLI
 check_aws_cli
