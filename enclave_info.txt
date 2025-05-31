@@ -1,0 +1,5 @@
+INSTANCE_ID=i-0afc68bbbee808b93
+SECURITY_GROUP_ID=sg-0e2fc5a07b6d6454b
+ENCLAVE_NAME=mnist-training-enclave
+AWS_REGION=us-east-2
+KEY_NAME=mnist-training-enclave-key

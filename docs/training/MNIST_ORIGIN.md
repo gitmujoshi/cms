@@ -103,4 +103,62 @@ The MNIST implementation serves as a template for document classification in the
 3. Monitoring and logging standards
 4. Security implementation guidelines
 
-This implementation provides a solid foundation for building more complex document classification models while maintaining production-grade quality and security standards. 
+This implementation provides a solid foundation for building more complex document classification models while maintaining production-grade quality and security standards.
+
+## AWS Nitro Enclaves Integration Plan
+
+### High-Level Plan
+
+1. **ECS Task Definition & Deployment**
+   - Switch from standard Fargate to EC2-backed ECS tasks with Nitro Enclave support.
+   - Update Terraform and deployment scripts to provision EC2 instances with enclave-enabled AMIs.
+
+2. **Enclave Application Changes**
+   - Use AWS KMS and Nitro Enclaves SDK to decrypt data inside the enclave.
+   - Update the training code to fetch the encrypted MNIST data from S3, pass it to the enclave, and decrypt/process it there.
+
+3. **S3 Data Handling**
+   - Store the MNIST dataset in an S3 bucket encrypted with a KMS key.
+   - Update the deployment and training scripts to download the encrypted data and only decrypt it inside the enclave.
+
+4. **IAM & Security**
+   - Update IAM roles and policies to allow access to the encrypted S3 bucket and KMS key, but only from the enclave.
+
+### Step-by-Step Guide
+
+#### Step 1: Update Infrastructure for Nitro Enclaves
+
+- **ECS Task Definition & Terraform Changes**
+  - Update the ECS task definition to use EC2 launch type instead of Fargate.
+  - Modify Terraform to provision EC2 instances with enclave-enabled AMIs (e.g., `m6i`, `c6i`, `r6i`).
+  - Ensure the ECS task definition includes enclave options and runs on compatible EC2 instances.
+
+#### Step 2: S3 Data Handling
+
+- **Encrypt MNIST Data**
+  - Store the MNIST dataset in an S3 bucket encrypted with a KMS key.
+  - Ensure the S3 bucket and KMS key are accessible only from the enclave.
+
+#### Step 3: Training Code & Enclave Runtime
+
+- **Data Download & Decryption**
+  - Update the training container to download the encrypted MNIST data from S3.
+  - Use the Nitro Enclaves SDK and KMS to decrypt the data inside the enclave.
+  - Perform model training using the decrypted data.
+
+#### Step 4: Deployment Script
+
+- **Update Deployment Scripts**
+  - Modify the deployment scripts to use the new ECS service/task definition.
+  - Ensure the enclave is started and used for decryption/training.
+
+#### Step 5: IAM & Security
+
+- **Update IAM Roles & Policies**
+  - Ensure IAM roles and policies allow access to the encrypted S3 bucket and KMS key, but only from the enclave.
+
+#### Step 6: Testing & Validation
+
+- **Test the Deployment**
+  - Deploy the updated infrastructure and verify that the MNIST data is decrypted only inside the enclave.
+  - Validate the training process and ensure security measures are effective. 

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message><BucketName>ec2-nitro-enclaves</BucketName><RequestId>KJT241BFSSKJ9R0T</RequestId><HostId>9VlwrTFPfaub4hYtCUYJqNUK5KZbnugUly9EwEk4mpi3PjXpZ/QlG4pJi1E5g3oZ50acNg+drXI=</HostId></Error>
