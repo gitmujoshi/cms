@@ -1,0 +1,24 @@
+MNIST Dataset Summary
+Generated on: 2025-05-31 00:38:09
+
+Training Data:
+- Number of samples: 60000
+- Image shape: (28, 28)
+- Value range: [0, 255]
+
+Test Data:
+- Number of samples: 10000
+- Image shape: (28, 28)
+- Value range: [0, 255]
+
+Class Distribution (Training):
+- Digit 0: 5923 samples (9.87%)
+- Digit 1: 6742 samples (11.24%)
+- Digit 2: 5958 samples (9.93%)
+- Digit 3: 6131 samples (10.22%)
+- Digit 4: 5842 samples (9.74%)
+- Digit 5: 5421 samples (9.04%)
+- Digit 6: 5918 samples (9.86%)
+- Digit 7: 6265 samples (10.44%)
+- Digit 8: 5851 samples (9.75%)
+- Digit 9: 5949 samples (9.92%)
