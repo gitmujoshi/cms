@@ -132,6 +132,15 @@ docker-compose.override.yml
 logs/
 log/
 
+# Training logs to ignore
+docs/training_logs/training_logs_*.json
+docs/training_logs/training_logs_*.txt
+docs/training_logs/training_report_*.txt
+training_logs.txt
+
+# Exception: Track training reports (markdown only)
+!docs/training_logs/*.md
+
 # Local development
 .DS_Store
 .env.local
@@ -228,7 +237,6 @@ secrets.*
 *.out
 
 # Misc
-*.log
 *.pid
 *.pid.lock
 
