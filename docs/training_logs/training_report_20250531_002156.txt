@@ -1,0 +1,67 @@
+MNIST Training Report
+Generated on: Sat May 31 00:21:56 EDT 2025
+==========================================
+
+Training Summary:
+----------------
+Final Accuracy: accuracy: 0.9775
+Final Loss: loss: 0.0747
+Training Duration: Epoch 1/5 to Epoch 5/5
+
+System Information:
+-----------------
+2025-05-31 04:17:53.440539: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2025-05-31 04:17:53.387713: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2025-05-31 04:17:53.440264: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+Memory Usage: 2025-05-31 04:17:56.809084: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
+2025-05-31 04:19:19.440154: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 31360000 exceeds 10% of free system memory.
+
+Training Progress:
+----------------
+Accuracy Progression:
+Step 0: accuracy: 0.8675
+Step 50: accuracy: 0.8907
+Step 100: accuracy: 0.9022
+Step 150: accuracy: 0.9128
+Step 200: accuracy: 0.9505
+Step 250: accuracy: 0.9542
+Step 300: accuracy: 0.9561
+Step 350: accuracy: 0.9671
+Step 400: accuracy: 0.9658
+Step 450: accuracy: 0.9669
+Step 500: accuracy: 0.9707
+Step 550: accuracy: 0.9732
+Step 600: accuracy: 0.9727
+Step 650: accuracy: 0.9804
+Step 700: accuracy: 0.9782
+Step 750: accuracy: 0.9768
+Step 800: accuracy: 0.9717
+
+Loss Progression:
+Step 0: loss: 0.4568
+Step 50: loss: 0.3773
+Step 100: loss: 0.3360
+Step 150: loss: 0.2988
+Step 200: loss: 0.1650
+Step 250: loss: 0.1552
+Step 300: loss: 0.1474
+Step 350: loss: 0.1070
+Step 400: loss: 0.1135
+Step 450: loss: 0.1099
+Step 500: loss: 0.0977
+Step 550: loss: 0.0885
+Step 600: loss: 0.0873
+Step 650: loss: 0.0611
+Step 700: loss: 0.0706
+Step 750: loss: 0.0742
+Step 800: loss: 0.0921
+
+Convergence Analysis:
+-------------------
+Initial Accuracy: accuracy: 0.0938
+Mid Training Accuracy: accuracy: 0.3606
+Final Accuracy: accuracy: 0.9775
+
+Errors and Warnings:
+------------------
+2025-05-31 04:17:54.573838: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT

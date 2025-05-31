@@ -100,11 +100,16 @@ module "alb" {
   tags                = var.tags
 }
 
+# ECR Repository for MNIST training
+data "aws_ecr_repository" "mnist" {
+  name = "mnist-training"
+}
+
 module "ecs_service" {
-  source = "./modules/ecs-service"
+  source = "../modules/ecs-service"
 
   task_family           = "mnist-training"
-  container_image       = "${aws_ecr_repository.mnist.repository_url}:latest"
+  container_image       = "${data.aws_ecr_repository.mnist.repository_url}:latest"
   execution_role_arn    = module.ecs_task_iam.role_arn
   task_role_arn         = module.ecs_task_iam.role_arn
   ecs_cluster_id        = module.ecs.cluster_id
@@ -114,18 +119,4 @@ module "ecs_service" {
   s3_bucket_name        = module.s3.bucket_name
   aws_region            = var.aws_region
   tags                  = var.tags
-}
-
-# ECR Repository for MNIST training
-resource "aws_ecr_repository" "mnist" {
-  name                 = "mnist-training"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  tags = merge(var.tags, {
-    Region = "us-east-2"
-  })
 } 

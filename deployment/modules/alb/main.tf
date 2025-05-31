@@ -8,11 +8,12 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_target_group" "this" {
-  name     = var.target_group_name
-  port     = var.target_group_port
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-  tags     = var.tags
+  name        = var.target_group_name
+  port        = var.target_group_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+  tags        = var.tags
 }
 
 resource "aws_lb_listener" "this" {

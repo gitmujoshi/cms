@@ -8,6 +8,11 @@ output "cluster_arn" {
   value       = aws_ecs_cluster.main.arn
 }
 
+output "cluster_id" {
+  description = "ID of the ECS cluster"
+  value       = aws_ecs_cluster.main.id
+}
+
 output "ecs_tasks_security_group_id" {
   description = "ID of the security group for ECS tasks"
   value       = aws_security_group.ecs_tasks.id

@@ -1,0 +1,59 @@
+MNIST Training Report
+Generated on: Sat May 31 00:12:34 EDT 2025
+==========================================
+
+Training Summary:
+----------------
+Final Accuracy: accuracy: 0.9758
+Final Loss: loss: 0.0742
+Training Duration: Epoch 1/5 to Epoch 5/5
+
+System Information:
+-----------------
+2025-05-31 04:10:06.277796: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2025-05-31 04:10:06.224553: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2025-05-31 04:10:06.277536: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+Memory Usage: 2025-05-31 04:10:09.521205: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
+2025-05-31 04:10:51.155263: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 31360000 exceeds 10% of free system memory.
+
+Training Progress:
+----------------
+Accuracy Progression:
+Step 0: accuracy: 0.8791
+Step 0: accuracy: 0.9063
+Step 0: accuracy: 0.9516
+Step 0: accuracy: 0.9550
+Step 0: accuracy: 0.9561
+Step 0: accuracy: 0.9648
+Step 0: accuracy: 0.9669
+Step 0: accuracy: 0.9673
+Step 0: accuracy: 0.9733
+Step 0: accuracy: 0.9737
+Step 0: accuracy: 0.9809
+Step 0: accuracy: 0.9780
+Step 0: accuracy: 0.9769
+
+Loss Progression:
+Step 0: loss: 0.4227
+Step 0: loss: 0.3269
+Step 0: loss: 0.1637
+Step 0: loss: 0.1535
+Step 0: loss: 0.1482
+Step 0: loss: 0.1174
+Step 0: loss: 0.1089
+Step 0: loss: 0.1087
+Step 0: loss: 0.0892
+Step 0: loss: 0.0875
+Step 0: loss: 0.0639
+Step 0: loss: 0.0703
+Step 0: loss: 0.0735
+
+Convergence Analysis:
+-------------------
+Initial Accuracy: accuracy: 0.1250
+Mid Training Accuracy: accuracy: 0.3915
+Final Accuracy: accuracy: 0.9758
+
+Errors and Warnings:
+------------------
+2025-05-31 04:10:07.383691: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT

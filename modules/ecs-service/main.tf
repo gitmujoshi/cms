@@ -13,6 +13,14 @@ resource "aws_ecs_task_definition" "mnist_training" {
       image     = var.container_image
       essential = true
       
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+          protocol      = "tcp"
+        }
+      ]
+      
       environment = [
         {
           name  = "MODEL_CHECKPOINT_PATH"
