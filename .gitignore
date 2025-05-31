@@ -230,4 +230,7 @@ secrets.*
 # Misc
 *.log
 *.pid
-*.pid.lock 
+*.pid.lock
+
+# Exception: Track training reports (markdown only)
+!docs/training_logs/*.md 
