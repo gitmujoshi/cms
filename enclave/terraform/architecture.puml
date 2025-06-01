@@ -1,0 +1,73 @@
+@startuml AWS Nitro Enclaves Infrastructure
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v16.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/Compute/EC2.puml
+!include AWSPuml/Storage/SimpleStorageService.puml
+!include AWSPuml/SecurityIdentityCompliance/KeyManagementService.puml
+!include AWSPuml/NetworkingContentDelivery/VPC.puml
+!include AWSPuml/NetworkingContentDelivery/InternetGateway.puml
+!include AWSPuml/NetworkingContentDelivery/RouteTable.puml
+!include AWSPuml/NetworkingContentDelivery/Subnet.puml
+!include AWSPuml/SecurityIdentityCompliance/SecurityGroup.puml
+!include AWSPuml/SecurityIdentityCompliance/IAM.puml
+
+skinparam componentStyle rectangle
+
+title AWS Nitro Enclaves Infrastructure
+
+' VPC and Networking
+VPC(vpc, "Enclave VPC", "10.0.0.0/16")
+InternetGateway(igw, "Internet Gateway")
+RouteTable(rt, "Route Table")
+Subnet(subnet, "Private Subnet", "10.0.0.0/24")
+SecurityGroup(sg, "Security Group", "SSH:22")
+
+' Compute
+EC2(ec2, "Nitro Enclave\nInstance", "c5.xlarge")
+
+' Storage
+SimpleStorageService(s3, "S3 Bucket", "mmju-luks-2024")
+
+' Security
+KeyManagementService(kms, "KMS Key", "enclave-training-key")
+IAM(iam, "IAM Role", "enclave-instance-role")
+
+' Relationships
+vpc --> igw
+vpc --> subnet
+subnet --> rt
+rt --> igw
+subnet --> sg
+ec2 --> sg
+ec2 --> subnet
+ec2 --> iam
+ec2 --> kms
+ec2 --> s3
+
+note right of ec2
+  - Nitro Enclaves enabled
+  - 50GB GP3 root volume
+  - User data script for
+  Nitro Enclaves setup
+end note
+
+note right of s3
+  - Server-side encryption
+  - Versioning enabled
+  - Public access blocked
+end note
+
+note right of kms
+  - Key rotation enabled
+  - 7-day deletion window
+  - IAM policies for EC2
+end note
+
+note right of iam
+  - EC2 instance role
+  - S3 access permissions
+  - KMS permissions
+end note
+
+@enduml 
