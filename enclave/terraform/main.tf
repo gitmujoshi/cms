@@ -39,18 +39,21 @@ resource "local_file" "public_key" {
 resource "aws_key_pair" "enclave_key" {
   key_name   = var.key_name
   public_key = tls_private_key.enclave_key.public_key_openssh
+  tags       = var.tags
 }
 
 # VPC and Networking
 module "vpc" {
   source = "./modules/vpc"
   vpc_cidr = var.vpc_cidr
+  tags     = var.tags
 }
 
 # S3 Bucket for encrypted data
 module "s3" {
   source = "./modules/s3"
   bucket_name = var.bucket_name
+  tags        = var.tags
 }
 
 # IAM roles and policies
@@ -58,6 +61,7 @@ module "iam" {
   source = "./modules/iam"
   s3_bucket_arn = module.s3.bucket_arn
   kms_key_arn = module.kms.key_arn
+  tags = var.tags
 }
 
 # KMS for encryption
@@ -65,6 +69,7 @@ module "kms" {
   source = "./modules/kms"
   key_alias = var.kms_key_alias
   ec2_role_arn = module.iam.role_arn
+  tags = var.tags
 }
 
 # EC2 Instance with Nitro Enclaves
@@ -72,6 +77,7 @@ module "ec2" {
   source = "./modules/ec2"
   vpc_id = module.vpc.vpc_id
   subnet_id = module.vpc.subnet_id
+  security_group_id = module.vpc.security_group_id
   key_name = aws_key_pair.enclave_key.key_name
   bucket_name = module.s3.bucket_name
   kms_key_id = module.kms.key_id
@@ -80,4 +86,11 @@ module "ec2" {
   root_volume_size = var.root_volume_size
   root_volume_type = var.root_volume_type
   ami_id = var.ami_id
+  tags = var.tags
+}
+
+# MNIST Model Module
+module "mnist" {
+  source = "./modules/mnist"
+  bucket_name = module.s3.bucket_name
 } 

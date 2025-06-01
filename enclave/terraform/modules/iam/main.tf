@@ -12,6 +12,8 @@ resource "aws_iam_role" "enclave" {
       }
     ]
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy" "enclave" {

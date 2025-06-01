@@ -7,5 +7,13 @@ output "subnet_id" {
 }
 
 output "security_group_id" {
-  value = length(data.aws_security_group.existing) > 0 ? data.aws_security_group.existing[0].id : aws_security_group.main[0].id
+  value = aws_security_group.main.id
+}
+
+output "internet_gateway_id" {
+  value = aws_internet_gateway.main.id
+}
+
+output "route_table_id" {
+  value = aws_route_table.main.id
 } 

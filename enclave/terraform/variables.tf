@@ -1,19 +1,18 @@
 variable "aws_region" {
-  description = "AWS region to deploy resources"
+  description = "AWS region"
   type        = string
   default     = "us-east-2"
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
+  description = "CIDR block for VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
 
 variable "bucket_name" {
-  description = "Name of the S3 bucket for encrypted data"
+  description = "Name of the S3 bucket"
   type        = string
-  default     = "mmju_luks"
 }
 
 variable "kms_key_alias" {
@@ -49,4 +48,14 @@ variable "root_volume_type" {
 variable "ami_id" {
   description = "ID of the Nitro Enclaves AMI"
   type        = string
+  default     = "ami-0c7217cdde317cfec"
+}
+
+variable "tags" {
+  description = "Common tags for all resources"
+  type        = map(string)
+  default = {
+    Project = "mmj_training"
+    Owner   = "mmj"
+  }
 } 

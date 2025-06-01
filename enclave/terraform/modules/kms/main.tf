@@ -3,9 +3,12 @@ resource "aws_kms_key" "main" {
   deletion_window_in_days = 7
   enable_key_rotation     = true
 
-  tags = {
-    Name = var.key_alias
-  }
+  tags = merge(
+    {
+      Name = var.key_alias
+    },
+    var.tags
+  )
 }
 
 resource "aws_kms_alias" "main" {

@@ -1,9 +1,12 @@
 resource "aws_s3_bucket" "main" {
   bucket = var.bucket_name
 
-  tags = {
-    Name = "enclave-training-data"
-  }
+  tags = merge(
+    {
+      Name = "enclave-training-data"
+    },
+    var.tags
+  )
 }
 
 resource "aws_s3_bucket_versioning" "main" {

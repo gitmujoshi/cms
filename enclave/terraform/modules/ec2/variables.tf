@@ -8,6 +8,11 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "security_group_id" {
+  description = "ID of the security group"
+  type        = string
+}
+
 variable "key_name" {
   description = "Name of the SSH key pair"
   type        = string
@@ -49,4 +54,10 @@ variable "root_volume_type" {
 variable "ami_id" {
   description = "ID of the Nitro Enclaves AMI"
   type        = string
+}
+
+variable "tags" {
+  description = "A map of tags to assign to the instance"
+  type        = map(string)
+  default     = {}
 } 
